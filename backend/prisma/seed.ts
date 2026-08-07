@@ -1,4 +1,4 @@
-import { PrismaClient, Role, KeyType, IpRuleType } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
@@ -19,7 +19,7 @@ async function main() {
       email: adminEmail,
       name: 'Super Admin',
       passwordHash,
-      role: Role.ADMIN,
+      role: 'ADMIN',
       isActive: true,
     },
   });
@@ -64,11 +64,11 @@ async function main() {
       name: 'Production Primary Key',
       keyPrefix: 'otp_live_demo',
       keyHash,
-      type: KeyType.LIVE,
+      type: 'LIVE',
       isActive: true,
     },
   });
-  console.log(`✅ API Key created: ${apiKey.name} (Raw Key for testing: ${rawKey})`);
+  console.log(`✅ API Key created: ${apiKey.name}`);
 
   // 5. Default WhatsApp Config
   const waConfig = await prisma.whatsAppConfig.create({
@@ -100,12 +100,12 @@ async function main() {
   await prisma.ipRule.createMany({
     data: [
       {
-        type: IpRuleType.WHITELIST,
+        type: 'WHITELIST',
         value: '127.0.0.1',
         reason: 'Localhost server testing',
       },
       {
-        type: IpRuleType.BLACKLIST,
+        type: 'BLACKLIST',
         value: '192.168.99.99',
         reason: 'Known suspicious bot subnet',
       },

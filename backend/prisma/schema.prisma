@@ -1,41 +1,10 @@
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-1.0.x", "rhel-openssl-3.0.x"]
-}
-
-enum Role {
-  ADMIN
-  OPERATOR
-  VIEWER
-}
-
-enum OtpStatus {
-  PENDING
-  VERIFIED
-  EXPIRED
-  CANCELLED
-  FAILED
-}
-
-enum Channel {
-  WHATSAPP
-  SMS
-  EMAIL
-}
-
-enum IpRuleType {
-  BLACKLIST
-  WHITELIST
-}
-
-enum KeyType {
-  LIVE
-  TEST
+  provider = "prisma-client-js"
 }
 
 model User {
@@ -43,7 +12,7 @@ model User {
   email         String     @unique
   passwordHash  String
   name          String
-  role          Role       @default(OPERATOR)
+  role          String     @default("OPERATOR") // ADMIN, OPERATOR, VIEWER
   isActive      Boolean    @default(true)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
@@ -92,7 +61,7 @@ model ApiKey {
   name          String
   keyPrefix     String    // e.g. otp_live_a1b2 or otp_test_x9y8
   keyHash       String    @unique
-  type          KeyType   @default(LIVE)
+  type          String    @default("LIVE") // LIVE, TEST
   isActive      Boolean   @default(true)
   lastUsedAt    DateTime?
   expiresAt     DateTime?
@@ -108,9 +77,9 @@ model OtpTransaction {
   id                String    @id @default(uuid())
   appId             String
   phoneNumber       String    // E.164 format, e.g. +966500000000
-  channel           Channel   @default(WHATSAPP)
+  channel           String    @default("WHATSAPP") // WHATSAPP, SMS, EMAIL
   otpHash           String    // HMAC/SHA-256 hashed OTP code
-  status            OtpStatus @default(PENDING)
+  status            String    @default("PENDING") // PENDING, VERIFIED, EXPIRED, CANCELLED, FAILED
   attempts          Int       @default(0)
   maxAttempts       Int       @default(3)
   resendCount       Int       @default(0)
@@ -119,7 +88,7 @@ model OtpTransaction {
   ipAddress         String?
   userAgent         String?
   deviceFingerprint String?
-  meta              Json?     // Extra context e.g. app version, country
+  meta              String?   // JSON string
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -150,9 +119,9 @@ model WhatsAppConfig {
 model MessageTemplate {
   id               String         @id @default(uuid())
   whatsappConfigId String
-  name             String         // Template name in Meta Manager e.g. "otp_verify"
+  name             String         // e.g. "otp_verification_code"
   language         String         @default("ar")
-  bodyText         String         // e.g. "كود التحقق الخاص بك هو: {{1}}"
+  bodyText         String         
   category         String         @default("AUTHENTICATION")
   status           String         @default("APPROVED")
   createdAt        DateTime       @default(now())
@@ -165,7 +134,7 @@ model MessageTemplate {
 
 model IpRule {
   id          String     @id @default(uuid())
-  type        IpRuleType @default(BLACKLIST)
+  type        String     @default("BLACKLIST") // BLACKLIST, WHITELIST
   value       String     // IP, CIDR, or Phone Country Prefix (e.g. +966 or 192.168.1.1)
   reason      String?
   isActive    Boolean    @default(true)
@@ -180,7 +149,7 @@ model WebhookEndpoint {
   tenantId    String
   url         String
   secret      String
-  events      String[]     // e.g. ["otp.sent", "otp.verified", "otp.failed"]
+  events      String       @default("otp.sent,otp.verified") // Comma-separated events
   isActive    Boolean      @default(true)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -195,7 +164,7 @@ model WebhookLog {
   id               String          @id @default(uuid())
   webhookEndpointId String
   event            String
-  payload          Json
+  payload          String          // JSON string
   responseCode     Int?
   responseBody     String?
   attempts         Int             @default(1)
@@ -211,9 +180,9 @@ model AuditLog {
   id          String   @id @default(uuid())
   userId      String?
   userEmail   String?
-  action      String   // e.g. "CREATE_API_KEY", "DELETE_APP", "UPDATE_SECURITY_RULE"
-  resource    String   // e.g. "ApiKey:123"
-  details     Json?
+  action      String   
+  resource    String   
+  details     String?  // JSON string
   ipAddress   String?
   createdAt   DateTime @default(now())
 
