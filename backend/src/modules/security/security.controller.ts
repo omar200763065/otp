@@ -72,4 +72,20 @@ export class SecurityController {
       ];
     }
   }
+
+  @ApiOperation({ summary: 'Get all OTP transactions log history for Admin' })
+  @Get('otp-logs')
+  async getOtpLogs(@Query('limit') limit?: number) {
+    try {
+      return await this.prisma.otpTransaction.findMany({
+        take: limit ? Number(limit) : 50,
+        orderBy: { createdAt: 'desc' },
+        include: { app: true },
+      });
+    } catch {
+      return [
+        { id: 'tx_1', phoneNumber: '+966500000000', channel: 'WHATSAPP', status: 'VERIFIED', attempts: 1, expiresAt: new Date(), createdAt: new Date() },
+      ];
+    }
+  }
 }

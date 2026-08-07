@@ -18,7 +18,7 @@ export const LogsPage: React.FC = () => {
     const fetchLogs = async () => {
       try {
         const [otpRes, auditRes] = await Promise.all([
-          api.get('/api/v1/logs?limit=50').catch(() => ({ data: [] })),
+          api.get('/admin/security/otp-logs?limit=50').catch(() => ({ data: [] })),
           api.get('/admin/security/audit-logs?limit=50').catch(() => ({ data: [] })),
         ]);
         setOtpLogs(otpRes.data || []);
