@@ -15,16 +15,20 @@
   ],
   "routes": [
     {
+      "src": "/api",
+      "dest": "/api/index.ts"
+    },
+    {
       "src": "/api/(.*)",
-      "dest": "/api/index.ts?__url=/api/$1"
+      "dest": "/api/index.ts"
     },
     {
       "src": "/admin/(.*)",
-      "dest": "/api/index.ts?__url=/admin/$1"
+      "dest": "/api/index.ts"
     },
     {
       "src": "/otp/(.*)",
-      "dest": "/api/index.ts?__url=/otp/$1"
+      "dest": "/api/index.ts"
     },
     {
       "handle": "filesystem"

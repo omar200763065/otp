@@ -59,32 +59,24 @@ export default async (req: any, res: any) => {
   try {
     await bootstrapServer();
 
-    // Extract explicit __url query parameter passed by Vercel route rewrite
-    let targetUrl = '';
-    if (req.url) {
-      try {
-        const parsed = new URL(req.url, 'http://localhost');
-        const paramUrl = parsed.searchParams.get('__url');
-        if (paramUrl) {
-          targetUrl = paramUrl;
-        }
-      } catch {}
+    // Extract original request path from Vercel headers or req.url
+    let rawPath =
+      req.headers['x-matched-path'] ||
+      req.headers['x-original-url'] ||
+      req.headers['x-forwarded-url'] ||
+      req.url ||
+      '/';
+
+    if (rawPath.startsWith('/api/index.ts')) {
+      rawPath = rawPath.replace('/api/index.ts', '') || '/';
+    } else if (rawPath.startsWith('/api/index')) {
+      rawPath = rawPath.replace('/api/index', '') || '/';
     }
 
-    if (!targetUrl) {
-      targetUrl = req.headers['x-matched-path'] || req.headers['x-original-url'] || req.url;
-    }
-
-    if (targetUrl && targetUrl.startsWith('/api/index.ts')) {
-      targetUrl = targetUrl.replace('/api/index.ts', '') || '/';
-    }
-
-    if (targetUrl) {
-      req.url = targetUrl;
-      req.originalUrl = targetUrl;
-      delete (req as any)._parsedUrl;
-      delete (req as any)._parsedUrlUrl;
-    }
+    req.url = rawPath;
+    req.originalUrl = rawPath;
+    delete (req as any)._parsedUrl;
+    delete (req as any)._parsedUrlUrl;
 
     server(req, res);
   } catch (err: any) {
