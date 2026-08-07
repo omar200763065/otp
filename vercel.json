@@ -15,12 +15,11 @@
   ],
   "routes": [
     {
-      "src": "/api/(.*)",
+      "src": "/(api|admin)/(.*)",
       "dest": "api/index.ts"
     },
     {
-      "src": "/admin/(.*)",
-      "dest": "api/index.ts"
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
