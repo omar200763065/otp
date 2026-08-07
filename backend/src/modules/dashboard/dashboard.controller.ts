@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 @ApiTags('Admin Dashboard Stats')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller(['admin/dashboard', 'api/admin/dashboard'])
+@Controller(['admin/dashboard', 'api/admin/dashboard', 'dashboard'])
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 

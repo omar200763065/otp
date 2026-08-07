@@ -57,11 +57,5 @@ async function bootstrapServer() {
 
 export default async (req: any, res: any) => {
   await bootstrapServer();
-  if (req.url && req.url.startsWith('/api/index')) {
-    req.url = req.url.replace('/api/index', '');
-    if (!req.url.startsWith('/')) {
-      req.url = '/' + req.url;
-    }
-  }
   server(req, res);
 };

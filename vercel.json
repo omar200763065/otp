@@ -16,11 +16,11 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/index"
+      "dest": "/api/index.ts"
     },
     {
       "src": "/admin/(.*)",
-      "dest": "/api/index"
+      "dest": "/api/index.ts"
     },
     {
       "handle": "filesystem"
