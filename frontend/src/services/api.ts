@@ -12,7 +12,7 @@ export const api = axios.create({
 // Interceptor to attach JWT token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('otp_saas_token');
-  if (token) {
+  if (token && token.startsWith('eyJ')) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

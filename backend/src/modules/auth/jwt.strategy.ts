@@ -7,7 +7,14 @@ import { PrismaService } from '../prisma/prisma.service';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly prisma: PrismaService) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: (req: any) => {
+        const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+        if (!token) return null;
+        if (token.startsWith('jwt_token_')) {
+          return null; // Prevent jwt malformed 500 errors for non-JWT strings
+        }
+        return token;
+      },
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || 'super_secret_jwt_key_enterprise_otp_2026_change_me!',
     });
