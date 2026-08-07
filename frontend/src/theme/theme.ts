@@ -8,33 +8,33 @@ export const getCustomTheme = (mode: 'dark' | 'light', direction: 'rtl' | 'ltr')
     palette: {
       mode,
       primary: {
-        main: '#0d9488', // Emerald Turquoise Teal (أخضر فيروزي)
-        light: '#2dd4bf', // Light Turquoise Mint
-        dark: '#0f766e',  // Deep Forest Teal
+        main: '#0d9488', // Emerald Teal
+        light: '#2dd4bf', 
+        dark: '#0f766e',  
         contrastText: '#ffffff',
       },
       secondary: {
-        main: '#06b6d4', // Electric Cyan
+        main: '#06b6d4', // Cyber Cyan
         light: '#38bdf8',
         dark: '#0891b2',
       },
       success: {
-        main: '#10b981', // Emerald Active
+        main: '#10b981', // Emerald Green Active
         light: '#34d399',
       },
       warning: {
         main: '#f59e0b', // Amber Alert
       },
       error: {
-        main: '#ef4444',
+        main: '#f43f5e', // Rose Red
       },
       background: {
-        default: isDark ? '#041316' : '#f0fdfa',
-        paper: isDark ? 'rgba(8, 36, 42, 0.75)' : 'rgba(255, 255, 255, 0.88)',
+        default: isDark ? '#080c14' : '#f8fafc',
+        paper: isDark ? 'rgba(15, 23, 42, 0.75)' : 'rgba(255, 255, 255, 0.92)',
       },
       text: {
-        primary: isDark ? '#f0fdfa' : '#0f172a',
-        secondary: isDark ? '#99f6e4' : '#5eead4',
+        primary: isDark ? '#f8fafc' : '#0f172a',
+        secondary: isDark ? '#94a3b8' : '#64748b',
       },
     },
     typography: {
@@ -46,35 +46,54 @@ export const getCustomTheme = (mode: 'dark' | 'light', direction: 'rtl' | 'ltr')
       button: { fontWeight: 700, textTransform: 'none' },
     },
     shape: {
-      borderRadius: 18,
+      borderRadius: 16,
     },
     components: {
+      MuiCssBaseline: {
+        styleOverrides: {
+          '*::-webkit-scrollbar': {
+            width: '8px',
+            height: '8px',
+          },
+          '*::-webkit-scrollbar-track': {
+            background: isDark ? 'rgba(15, 23, 42, 0.5)' : 'rgba(241, 245, 249, 0.5)',
+          },
+          '*::-webkit-scrollbar-thumb': {
+            background: isDark ? 'rgba(45, 212, 191, 0.2)' : 'rgba(13, 148, 136, 0.2)',
+            borderRadius: '4px',
+          },
+          '*::-webkit-scrollbar-thumb:hover': {
+            background: isDark ? 'rgba(45, 212, 191, 0.4)' : 'rgba(13, 148, 136, 0.4)',
+          },
+        },
+      },
       MuiPaper: {
         styleOverrides: {
           root: {
             backgroundImage: isDark 
-              ? 'linear-gradient(135deg, rgba(45, 212, 191, 0.04) 0%, rgba(6, 182, 212, 0.02) 100%)' 
-              : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240, 253, 250, 0.8) 100%)',
+              ? 'linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%)' 
+              : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.85) 100%)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
-            border: isDark ? '1px solid rgba(45, 212, 191, 0.15)' : '1px solid rgba(13, 148, 136, 0.1)',
+            border: isDark ? '1px solid rgba(45, 212, 191, 0.12)' : '1px solid rgba(13, 148, 136, 0.12)',
             boxShadow: isDark 
-              ? '0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 1px inset rgba(45, 212, 191, 0.2)' 
-              : '0 20px 40px -15px rgba(13, 148, 136, 0.08)',
-            transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease',
+              ? '0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 1px inset rgba(45, 212, 191, 0.15)' 
+              : '0 20px 40px -15px rgba(13, 148, 136, 0.06)',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           },
         },
       },
       MuiButton: {
         styleOverrides: {
           root: {
-            borderRadius: 14,
+            borderRadius: 12,
             padding: '10px 24px',
             fontSize: '0.92rem',
             boxShadow: 'none',
+            transition: 'all 0.25s ease',
             '&:hover': {
-              boxShadow: '0 8px 20px rgba(13, 148, 136, 0.4)',
-              transform: 'translateY(-1px)',
+              boxShadow: '0 8px 25px rgba(13, 148, 136, 0.35)',
+              transform: 'translateY(-2px)',
             },
           },
         },
@@ -83,8 +102,8 @@ export const getCustomTheme = (mode: 'dark' | 'light', direction: 'rtl' | 'ltr')
         styleOverrides: {
           root: {
             '& .MuiOutlinedInput-root': {
-              borderRadius: 14,
-              backgroundColor: isDark ? 'rgba(4, 19, 22, 0.4)' : 'rgba(255, 255, 255, 0.7)',
+              borderRadius: 12,
+              backgroundColor: isDark ? 'rgba(15, 23, 42, 0.5)' : 'rgba(255, 255, 255, 0.8)',
               backdropFilter: 'blur(8px)',
               '& fieldset': {
                 borderColor: isDark ? 'rgba(45, 212, 191, 0.2)' : 'rgba(13, 148, 136, 0.2)',
@@ -104,7 +123,7 @@ export const getCustomTheme = (mode: 'dark' | 'light', direction: 'rtl' | 'ltr')
         styleOverrides: {
           root: {
             fontWeight: 700,
-            borderRadius: 10,
+            borderRadius: 8,
           },
         },
       },
