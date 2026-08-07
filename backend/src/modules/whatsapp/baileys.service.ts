@@ -6,12 +6,14 @@ import * as fs from 'fs';
 // Baileys types fallback & import
 let makeWASocket: any;
 let useMultiFileAuthState: any;
+let fetchLatestBaileysVersion: any;
 let DisconnectReason: any;
 
 try {
   const baileys = require('@whiskeysockets/baileys');
   makeWASocket = baileys.default || baileys.makeWASocket;
   useMultiFileAuthState = baileys.useMultiFileAuthState;
+  fetchLatestBaileysVersion = baileys.fetchLatestBaileysVersion;
   DisconnectReason = baileys.DisconnectReason;
 } catch (e) {
   // Graceful fallback if baileys optional dependencies missing
@@ -46,12 +48,12 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
     if (this.socket) {
       try {
         this.socket.ev.removeAllListeners();
-      } catch {}
+      } catch { }
     }
   }
 
   /**
-   * Initializes Baileys WhatsApp Web Client with valid Browser Credentials
+   * Initializes Baileys WhatsApp Web Client with valid Browser Credentials & Latest Version
    */
   async initBaileys() {
     if (!makeWASocket || !useMultiFileAuthState) {
@@ -66,11 +68,20 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
 
       const { state, saveCreds } = await useMultiFileAuthState(this.authFolder);
 
+      let versionTuple = [2, 3000, 1015901307];
+      if (fetchLatestBaileysVersion) {
+        try {
+          const { version } = await fetchLatestBaileysVersion();
+          versionTuple = version;
+        } catch {}
+      }
+
       this.connectionStatus = BaileysStatus.CONNECTING;
       this.socket = makeWASocket({
+        version: versionTuple,
         auth: state,
         printQRInTerminal: false,
-        browser: ['Ubuntu', 'Chrome', '120.0.0'], // Authentic browser tuple required by WhatsApp Web protocol
+        browser: ['Mac OS', 'Chrome', '121.0.0'], // Authentic browser tuple required by WhatsApp Web protocol
         logger: require('pino')({ level: 'silent' }),
         connectTimeoutMs: 60000,
         defaultQueryTimeoutMs: 60000,
@@ -100,7 +111,7 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
           const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
           const shouldReconnect = statusCode !== DisconnectReason?.loggedOut;
           this.logger.warn(`Baileys connection closed. Reason code: ${statusCode}, Reconnecting: ${shouldReconnect}`);
-          
+
           this.connectionStatus = BaileysStatus.DISCONNECTED;
           this.connectedPhoneNumber = null;
 
@@ -180,14 +191,14 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
       if (this.socket) {
         await this.socket.logout();
       }
-    } catch {}
+    } catch { }
 
     this.clearSession();
     this.connectionStatus = BaileysStatus.DISCONNECTED;
     this.qrDataUrl = null;
     this.rawQrString = null;
     this.connectedPhoneNumber = null;
-    
+
     setTimeout(() => this.initBaileys(), 1500);
     return { success: true, message: 'Session logged out and reset.' };
   }
@@ -196,7 +207,7 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
     if (fs.existsSync(this.authFolder)) {
       try {
         fs.rmSync(this.authFolder, { recursive: true, force: true });
-      } catch {}
+      } catch { }
     }
   }
 }
