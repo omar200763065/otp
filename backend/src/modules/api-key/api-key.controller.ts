@@ -9,7 +9,7 @@ import { Role, KeyType } from '../../common/enums';
 @ApiTags('Admin API Keys')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('admin/api-keys')
+@Controller(['admin/api-keys', 'api/admin/api-keys'])
 export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 

@@ -10,7 +10,7 @@ import { Role } from '../../common/enums';
 @ApiTags('Admin WhatsApp Management')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('admin/whatsapp')
+@Controller(['admin/whatsapp', 'api/admin/whatsapp'])
 export class WhatsAppController {
   constructor(
     private readonly whatsAppService: WhatsAppService,

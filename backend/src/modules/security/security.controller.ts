@@ -9,7 +9,7 @@ import { Role, IpRuleType } from '../../common/enums';
 @ApiTags('Admin Security Center')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('admin/security')
+@Controller(['admin/security', 'api/admin/security'])
 export class SecurityController {
   constructor(private readonly prisma: PrismaService) {}
 
