@@ -8,8 +8,10 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types", "./backend/node_modules/@types"],
     "paths": {
-      "@/*": ["backend/src/*"]
+      "@/*": ["backend/src/*"],
+      "*": ["node_modules/*", "backend/node_modules/*"]
     }
   },
   "include": ["api/**/*", "backend/src/**/*"]
