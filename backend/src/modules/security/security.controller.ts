@@ -4,7 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { Role, IpRuleType } from '@prisma/client';
+import { Role, IpRuleType } from '../../common/enums';
 
 @ApiTags('Admin Security Center')
 @ApiBearerAuth()

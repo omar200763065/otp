@@ -8,6 +8,7 @@ let makeWASocket: any;
 let useMultiFileAuthState: any;
 let fetchLatestBaileysVersion: any;
 let DisconnectReason: any;
+let Browsers: any;
 
 try {
   const baileys = require('@whiskeysockets/baileys');
@@ -15,6 +16,7 @@ try {
   useMultiFileAuthState = baileys.useMultiFileAuthState;
   fetchLatestBaileysVersion = baileys.fetchLatestBaileysVersion;
   DisconnectReason = baileys.DisconnectReason;
+  Browsers = baileys.Browsers;
 } catch (e) {
   // Graceful fallback if baileys optional dependencies missing
 }
@@ -81,7 +83,7 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
         version: versionTuple,
         auth: state,
         printQRInTerminal: false,
-        browser: ['Mac OS', 'Chrome', '121.0.0'], // Authentic browser tuple required by WhatsApp Web protocol
+        browser: Browsers ? Browsers.ubuntu('Chrome') : ['Ubuntu', 'Chrome', '20.0.04'],
         logger: require('pino')({ level: 'silent' }),
         connectTimeoutMs: 60000,
         defaultQueryTimeoutMs: 60000,

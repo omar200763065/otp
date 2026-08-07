@@ -1,6 +1,6 @@
 import { Injectable, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { IpRuleType } from '@prisma/client';
+import { IpRuleType } from '../../common/enums';
 
 @Injectable()
 export class SecurityService {

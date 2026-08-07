@@ -4,7 +4,7 @@ import { ApiKeyService } from './api-key.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { Role, KeyType } from '@prisma/client';
+import { Role, KeyType } from '../../common/enums';
 
 @ApiTags('Admin API Keys')
 @ApiBearerAuth()

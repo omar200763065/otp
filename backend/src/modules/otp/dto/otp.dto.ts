@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, IsOptional, IsEnum, Matches, Length } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Channel } from '@prisma/client';
+import { Channel } from '../../../common/enums';
 
 export class SendOtpDto {
   @ApiProperty({ example: '+966500000000', description: 'Phone number in E.164 format' })

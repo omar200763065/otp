@@ -64,13 +64,16 @@ export const WhatsAppPage: React.FC = () => {
     }
   };
 
-  const handleGenerateInstantQR = () => {
+  const handleGenerateInstantQR = async () => {
     setLoading(true);
-    // Generate valid instant QR pairing URL session
-    const pairingSessionId = `2@${Math.random().toString(36).substring(2, 15)}_${Date.now()},1`;
-    const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(pairingSessionId)}`;
-    setCustomQrUrl(qrImage);
-    setTimeout(() => setLoading(false), 500);
+    try {
+      await api.post('/admin/whatsapp/disconnect');
+      await fetchStatus();
+    } catch (err: any) {
+      console.error('Error resetting WhatsApp QR session:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSaveMeta = (e: React.FormEvent) => {
@@ -100,8 +103,6 @@ export const WhatsAppPage: React.FC = () => {
     connectedPhoneNumber: null,
     qrDataUrl: null 
   };
-
-  const activeQrCodeUrl = baileys.qrDataUrl || customQrUrl || `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent('2@live_otp_saas_pairing_session_ready')}`;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3.5 }}>
@@ -195,27 +196,50 @@ export const WhatsAppPage: React.FC = () => {
                     افتح تطبيق الواتساب على هاتفك &gt; الأجهزة المرتبطة &gt; ربط جهاز &gt; وجه الكاميرا للرمز أدناه:
                   </Alert>
 
-                  <Box 
-                    sx={{ 
-                      p: 2.5, 
-                      borderRadius: 4, 
-                      bgcolor: '#ffffff', 
-                      boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-                      border: '4px solid #0d9488',
-                      position: 'relative'
-                    }}
-                  >
-                    <img 
-                      src={activeQrCodeUrl} 
-                      alt="WhatsApp Web Pairing QR Code" 
-                      style={{ width: 250, height: 250, display: 'block' }} 
-                    />
-                  </Box>
+                  {baileys.qrDataUrl ? (
+                    <Box 
+                      sx={{ 
+                        p: 2.5, 
+                        borderRadius: 4, 
+                        bgcolor: '#ffffff', 
+                        boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                        border: '4px solid #0d9488',
+                        position: 'relative'
+                      }}
+                    >
+                      <img 
+                        src={baileys.qrDataUrl} 
+                        alt="WhatsApp Web Pairing QR Code" 
+                        style={{ width: 250, height: 250, display: 'block' }} 
+                      />
+                    </Box>
+                  ) : (
+                    <Box 
+                      sx={{ 
+                        width: 280, 
+                        height: 280, 
+                        borderRadius: 4, 
+                        bgcolor: 'rgba(15, 23, 42, 0.6)', 
+                        border: '2px dashed rgba(45, 212, 191, 0.4)', 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        gap: 2,
+                        p: 3
+                      }}
+                    >
+                      <CircularProgress size={42} sx={{ color: '#2dd4bf' }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
+                        جاري إعداد كود QR جديد وصالح من الواتساب...
+                      </Typography>
+                    </Box>
+                  )}
 
                   <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
                     <Chip 
-                      icon={<RefreshCw size={14} className="animate-spin" color="#2dd4bf" />} 
-                      label="كود الـ QR Code جاهز للمسح من الواتساب" 
+                      icon={<RefreshCw size={14} className={baileys.qrDataUrl ? '' : 'animate-spin'} color="#2dd4bf" />} 
+                      label={baileys.qrDataUrl ? 'كود QR حقيقي ومباشر جاهز للمسح' : 'جاري توليد الكود من الواتساب...'} 
                       variant="outlined"
                       sx={{ fontWeight: 800, borderRadius: 3, color: '#2dd4bf', borderColor: 'rgba(45, 212, 191, 0.4)' }}
                     />
@@ -223,10 +247,11 @@ export const WhatsAppPage: React.FC = () => {
                       size="small" 
                       variant="outlined" 
                       onClick={handleGenerateInstantQR} 
+                      disabled={loading}
                       startIcon={<RefreshCw size={14} />} 
                       sx={{ fontWeight: 800, color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.4)', borderRadius: 2.5 }}
                     >
-                      توليد كود QR جديد فوري
+                      تجديد وإعادة توليد كود الـ QR
                     </Button>
                   </Box>
                 </Box>

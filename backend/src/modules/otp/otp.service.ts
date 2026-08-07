@@ -4,7 +4,7 @@ import { WhatsAppService } from '../whatsapp/whatsapp.service';
 import { SecurityService } from '../security/security.service';
 import { CryptoUtil } from '../../common/utils/crypto.util';
 import { SendOtpDto, VerifyOtpDto, ResendOtpDto, CancelOtpDto } from './dto/otp.dto';
-import { OtpStatus } from '@prisma/client';
+import { OtpStatus } from '../../common/enums';
 
 @Injectable()
 export class OtpService {

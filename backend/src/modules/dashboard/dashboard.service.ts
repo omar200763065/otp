@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { OtpStatus } from '@prisma/client';
+import { OtpStatus } from '../../common/enums';
 
 @Injectable()
 export class DashboardService {

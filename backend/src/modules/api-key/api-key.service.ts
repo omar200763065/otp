@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CryptoUtil } from '../../common/utils/crypto.util';
-import { KeyType } from '@prisma/client';
+import { KeyType } from '../../common/enums';
 
 @Injectable()
 export class ApiKeyService {
