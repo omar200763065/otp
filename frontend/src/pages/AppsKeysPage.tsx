@@ -26,8 +26,8 @@ export const AppsKeysPage: React.FC = () => {
   const fetchData = async () => {
     try {
       const [appsRes, keysRes] = await Promise.all([
-        api.get('/admin/apps'),
-        api.get('/admin/api-keys'),
+        api.get('/api/admin/apps'),
+        api.get('/api/admin/api-keys'),
       ]);
       setApps(appsRes.data || []);
       setKeys(keysRes.data || []);
@@ -42,7 +42,7 @@ export const AppsKeysPage: React.FC = () => {
 
   const handleCreateApp = async () => {
     try {
-      const res = await api.post('/admin/apps', { name: appName, slug: appSlug });
+      const res = await api.post('/api/admin/apps', { name: appName, slug: appSlug });
       setOpenAppModal(false);
       setAppName('');
       setAppSlug('');
@@ -65,7 +65,7 @@ export const AppsKeysPage: React.FC = () => {
 
   const handleGenerateKey = async () => {
     try {
-      const res = await api.post('/admin/api-keys', {
+      const res = await api.post('/api/admin/api-keys', {
         appId: selectedAppId,
         name: keyName,
         type: 'LIVE',

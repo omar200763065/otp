@@ -29,7 +29,7 @@ export const QuickOtpModal: React.FC<QuickOtpModalProps> = ({ open, onClose }) =
 
     try {
       // First try real OTP endpoint or fallback simulation endpoint
-      const response = await api.post('/otp/send', {
+      const response = await api.post('/api/v1/send-otp', {
         phoneNumber,
         channel,
       }).catch(async () => {

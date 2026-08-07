@@ -23,7 +23,7 @@ export const OverviewPage: React.FC = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const res = await api.get('/admin/dashboard/overview');
+      const res = await api.get('/api/admin/dashboard/overview');
       setData(res.data);
     } catch (err) {
       console.warn('Dashboard overview poll:', err);

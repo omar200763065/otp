@@ -23,7 +23,7 @@ export const SecurityPage: React.FC = () => {
 
   const fetchRules = async () => {
     try {
-      const res = await api.get('/admin/security/rules');
+      const res = await api.get('/api/admin/security/rules');
       setRules(res.data || []);
     } catch (err) {
       console.warn('Security rules fetch notice:', err);
@@ -36,7 +36,7 @@ export const SecurityPage: React.FC = () => {
 
   const handleCreateRule = async () => {
     try {
-      await api.post('/admin/security/rules', { type, value, reason });
+      await api.post('/api/admin/security/rules', { type, value, reason });
       setOpenModal(false);
       setValue('');
       setReason('');
@@ -52,7 +52,7 @@ export const SecurityPage: React.FC = () => {
 
   const handleDeleteRule = async (id: string) => {
     try {
-      await api.delete(`/admin/security/rules/${id}`);
+      await api.delete(`/api/admin/security/rules/${id}`);
       fetchRules();
     } catch (err: any) {
       setRules(rules.filter(r => r.id !== id));

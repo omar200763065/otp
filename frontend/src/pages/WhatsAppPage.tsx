@@ -27,7 +27,7 @@ export const WhatsAppPage: React.FC = () => {
 
   const fetchStatus = async () => {
     try {
-      const res = await api.get('/admin/whatsapp/status');
+      const res = await api.get('/api/admin/whatsapp/status');
       setStatusData(res.data);
     } catch (err) {
       console.warn('WhatsApp status API poll:', err);
@@ -44,7 +44,7 @@ export const WhatsAppPage: React.FC = () => {
 
   const handleSwitchProvider = async (mode: 'BAILEYS_QR' | 'META_CLOUD_API') => {
     try {
-      await api.post('/admin/whatsapp/provider', { mode });
+      await api.post('/api/admin/whatsapp/provider', { mode });
       fetchStatus();
     } catch (err: any) {
       setStatusData((prev: any) => ({ ...prev, providerMode: mode }));
@@ -55,7 +55,7 @@ export const WhatsAppPage: React.FC = () => {
     setLoading(true);
     setCustomQrUrl(null);
     try {
-      await api.post('/admin/whatsapp/disconnect');
+      await api.post('/api/admin/whatsapp/disconnect');
       await fetchStatus();
     } catch (err: any) {
       console.error(err);
@@ -67,7 +67,7 @@ export const WhatsAppPage: React.FC = () => {
   const handleGenerateInstantQR = async () => {
     setLoading(true);
     try {
-      await api.post('/admin/whatsapp/disconnect');
+      await api.post('/api/admin/whatsapp/disconnect');
       await fetchStatus();
     } catch (err: any) {
       console.error('Error resetting WhatsApp QR session:', err);
