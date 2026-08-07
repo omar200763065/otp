@@ -373,10 +373,11 @@ export const DashboardLayout: React.FC = () => {
         </Toolbar>
       </AppBar>
 
-      {/* Navigation Drawer */}
+      {/* Navigation Drawer (Pinned to the Right Side) */}
       {isMobile ? (
         <Drawer
           variant="temporary"
+          anchor="right"
           open={mobileOpen}
           onClose={() => setMobileOpen(false)}
           ModalProps={{ keepMounted: true }}
@@ -393,6 +394,7 @@ export const DashboardLayout: React.FC = () => {
       ) : (
         <Drawer
           variant="permanent"
+          anchor="right"
           sx={{
             width: drawerWidth,
             flexShrink: 0,
@@ -401,7 +403,8 @@ export const DashboardLayout: React.FC = () => {
               boxSizing: 'border-box',
               backgroundColor: mode === 'dark' ? 'rgba(8, 12, 20, 0.72)' : 'rgba(255, 255, 255, 0.82)',
               backdropFilter: 'blur(24px)',
-              borderRight: mode === 'dark' ? '1px solid rgba(45, 212, 191, 0.15)' : '1px solid rgba(13, 148, 136, 0.15)',
+              borderLeft: mode === 'dark' ? '1px solid rgba(45, 212, 191, 0.18)' : '1px solid rgba(13, 148, 136, 0.18)',
+              borderRight: 'none',
             },
           }}
         >
