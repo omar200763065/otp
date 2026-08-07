@@ -3,7 +3,7 @@ import {
   Box, Paper, Typography, TextField, Button, Alert, CircularProgress, 
   InputAdornment, IconButton, Chip 
 } from '@mui/material';
-import { ShieldCheck, Lock, Mail, Eye, EyeOff, Zap, KeyRound, ShieldAlert } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, Eye, EyeOff, Zap, KeyRound, ShieldAlert, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,17 +23,24 @@ export const LoginPage: React.FC = () => {
 
     try {
       await login(email, password);
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'فشل تسجيل الدخول. يرجى التأكد من صحة البيانات المسجلة.');
+      setError(err.response?.data?.message || 'فشل تسجيل الدخول. يرجى التأكد من البيانات.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleQuickFillDemo = () => {
-    setEmail('admin@otpsaas.com');
-    setPassword('AdminPassword123!');
+  const handleQuickDemoLogin = async () => {
+    setLoading(true);
+    try {
+      await login('admin@otpsaas.com', 'AdminPassword123!');
+      navigate('/', { replace: true });
+    } catch (err: any) {
+      setError('فشل الدخول التلقائي.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -43,38 +50,35 @@ export const LoginPage: React.FC = () => {
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center',
-        background: 'radial-gradient(circle at 50% 20%, #0d2830 0%, #080c14 70%)',
+        background: 'radial-gradient(circle at 50% 25%, #0f2733 0%, #080c14 75%)',
         p: 2.5,
         position: 'relative',
         overflow: 'hidden',
         '&::before': {
           content: '""',
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundImage: 'radial-gradient(rgba(45, 212, 191, 0.08) 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundImage: 'radial-gradient(rgba(45, 212, 191, 0.1) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
           pointerEvents: 'none',
         }
       }}
     >
-      {/* Decorative Glow Orbs */}
-      <Box sx={{ position: 'absolute', width: 350, height: 350, borderRadius: '50%', background: 'rgba(13, 148, 136, 0.15)', filter: 'blur(90px)', top: '-10%', right: '15%' }} />
-      <Box sx={{ position: 'absolute', width: 300, height: 300, borderRadius: '50%', background: 'rgba(6, 182, 212, 0.12)', filter: 'blur(80px)', bottom: '-10%', left: '15%' }} />
+      {/* Decorative Cyber Lighting */}
+      <Box sx={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'rgba(13, 148, 136, 0.18)', filter: 'blur(100px)', top: '-15%', right: '10%' }} />
+      <Box sx={{ position: 'absolute', width: 350, height: 350, borderRadius: '50%', background: 'rgba(6, 182, 212, 0.14)', filter: 'blur(90px)', bottom: '-15%', left: '10%' }} />
 
       <Paper
         elevation={24}
         sx={{
           width: '100%',
-          maxWidth: 460,
+          maxWidth: 480,
           p: { xs: 3.5, sm: 4.5 },
           borderRadius: 5,
           backdropFilter: 'blur(24px)',
-          backgroundColor: 'rgba(15, 23, 42, 0.85)',
-          border: '1px solid rgba(45, 212, 191, 0.2)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(13, 148, 136, 0.15)',
+          backgroundColor: 'rgba(15, 23, 42, 0.88)',
+          border: '1px solid rgba(45, 212, 191, 0.25)',
+          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 35px rgba(13, 148, 136, 0.2)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -82,41 +86,41 @@ export const LoginPage: React.FC = () => {
           zIndex: 1,
         }}
       >
-        {/* Header Icon */}
+        {/* Shield Icon */}
         <Box 
           sx={{ 
-            width: 64, 
-            height: 64, 
-            borderRadius: 4, 
+            width: 68, 
+            height: 68, 
+            borderRadius: 4.5, 
             background: 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             mb: 2.5,
-            boxShadow: '0 10px 30px rgba(13, 148, 136, 0.4)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 10px 30px rgba(13, 148, 136, 0.5)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
           }}
         >
-          <ShieldCheck color="#ffffff" size={36} />
+          <ShieldCheck color="#ffffff" size={40} />
         </Box>
 
         <Typography variant="h5" sx={{ fontWeight: 800, mb: 0.8, textAlign: 'center', background: 'linear-gradient(90deg, #f8fafc, #2dd4bf)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-          بوابة إدارة OTP SaaS
+          تسجيل الدخول - منصة OTP SaaS
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center', lineHeight: 1.6 }}>
-          لوحة تحكّم الجيل الجديد للتحقق بخطوتين وتأمين الـ API
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, textAlign: 'center', lineHeight: 1.6 }}>
+          لوحة تحكّم الجيل الجديد المستقلة للتحقق بخطوتين عبر الواتساب والـ API
         </Typography>
 
         <Chip 
           icon={<ShieldAlert size={14} color="#2dd4bf" />} 
-          label="حماية مشددة تشفير AES-256-GCM" 
+          label="حماية مشددة وتشغيل تلقائي مؤمّن" 
           size="small" 
           sx={{ 
             mb: 3, 
             background: 'rgba(13, 148, 136, 0.15)', 
             border: '1px solid rgba(45, 212, 191, 0.3)',
             color: '#2dd4bf',
-            fontWeight: 700,
+            fontWeight: 800,
             fontSize: '0.78rem'
           }} 
         />
@@ -130,7 +134,7 @@ export const LoginPage: React.FC = () => {
         <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
           <TextField
             fullWidth
-            label="البريد الإلكتروني"
+            label="البريد الإلكتروني للمسؤول"
             variant="outlined"
             margin="normal"
             value={email}
@@ -193,23 +197,34 @@ export const LoginPage: React.FC = () => {
               }
             }}
           >
-            {loading ? 'جاري التحقق والأمان...' : 'دخول النظام الآمن'}
+            {loading ? 'جاري التحقق والدخول...' : 'دخول لوحة التحكم الحالية'}
           </Button>
         </Box>
 
-        {/* Quick Demo Fill Option */}
-        <Box sx={{ width: '100%', mt: 3, pt: 2.5, borderTop: '1px dashed rgba(255, 255, 255, 0.1)', textAlign: 'center' }}>
+        {/* Quick Instant Demo Login Button */}
+        <Box sx={{ width: '100%', mt: 3, pt: 2.5, borderTop: '1px dashed rgba(255, 255, 255, 0.12)', textAlign: 'center' }}>
           <Button
-            size="small"
-            onClick={handleQuickFillDemo}
-            startIcon={<Zap size={15} color="#f59e0b" />}
+            fullWidth
+            variant="outlined"
+            size="medium"
+            onClick={handleQuickDemoLogin}
+            disabled={loading}
+            startIcon={<Zap size={18} color="#f59e0b" />}
             sx={{ 
-              color: '#94a3b8', 
-              fontSize: '0.82rem',
-              '&:hover': { color: '#2dd4bf', background: 'rgba(45, 212, 191, 0.08)' } 
+              py: 1.2,
+              borderRadius: 3,
+              borderColor: 'rgba(245, 158, 11, 0.4)',
+              color: '#f59e0b',
+              fontWeight: 800,
+              fontSize: '0.9rem',
+              backgroundColor: 'rgba(245, 158, 11, 0.08)',
+              '&:hover': {
+                backgroundColor: 'rgba(245, 158, 11, 0.18)',
+                borderColor: '#f59e0b',
+              } 
             }}
           >
-            تعبئة تلقائية لبيانات المسؤول التجريبي
+            دخول فوري تجريبي بضغطة واحدة (One-Click Instant Login)
           </Button>
         </Box>
       </Paper>
