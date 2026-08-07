@@ -34,6 +34,11 @@ async function bootstrapServerless() {
 }
 
 export default async function handler(req: any, res: any) {
+  // Fix Vercel URL rewrite path forwarding
+  if (req.headers['x-matched-path']) {
+    req.url = req.headers['x-matched-path'];
+  }
+  console.log(`[Vercel Serverless Request] ${req.method} ${req.url}`);
   await bootstrapServerless();
   server(req, res);
 }
