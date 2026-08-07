@@ -34,11 +34,12 @@ async function bootstrapServerless() {
 }
 
 export default async function handler(req: any, res: any) {
-  // Fix Vercel URL rewrite path forwarding
-  if (req.headers['x-matched-path']) {
-    req.url = req.headers['x-matched-path'];
+  // Ensure req.url matches original path for NestJS route resolution
+  const path = req.headers['x-invoke-path'] || req.headers['x-matched-path'] || req.url;
+  if (path && typeof path === 'string') {
+    req.url = path;
   }
-  console.log(`[Vercel Serverless Request] ${req.method} ${req.url}`);
+  console.log(`[Vercel Serverless] Executing ${req.method} ${req.url}`);
   await bootstrapServerless();
   server(req, res);
 }
