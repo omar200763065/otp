@@ -36,10 +36,15 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
   private rawQrString: string | null = null;
   private connectionStatus: BaileysStatus = BaileysStatus.DISCONNECTED;
   private connectedPhoneNumber: string | null = null;
-  private authFolder = path.join(process.cwd(), 'baileys_auth_info');
+  private getAuthFolder(): string {
+    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+      return path.join('/tmp', 'baileys_auth_info');
+    }
+    return path.join(process.cwd(), 'baileys_auth_info');
+  }
 
   async onModuleInit() {
-    if (process.env.ENABLE_BAILEYS !== 'false') {
+    if (process.env.ENABLE_BAILEYS !== 'false' && !process.env.VERCEL) {
       this.initBaileys().catch((err) => {
         this.logger.warn(`Baileys initialization postponed: ${err.message}`);
       });
@@ -58,17 +63,27 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
    * Initializes Baileys WhatsApp Web Client with valid Browser Credentials & Latest Version
    */
   async initBaileys() {
+    if (process.env.VERCEL) {
+      this.logger.log('Vercel serverless mode: Baileys persistent socket initialization skipped.');
+      return;
+    }
+
     if (!makeWASocket || !useMultiFileAuthState) {
       this.logger.warn('Baileys library not initialized in current runner mode.');
       return;
     }
 
     try {
-      if (!fs.existsSync(this.authFolder)) {
-        fs.mkdirSync(this.authFolder, { recursive: true });
+      const authFolder = this.getAuthFolder();
+      if (!fs.existsSync(authFolder)) {
+        try {
+          fs.mkdirSync(authFolder, { recursive: true });
+        } catch (e: any) {
+          this.logger.warn(`Could not create auth folder ${authFolder}: ${e.message}`);
+        }
       }
 
-      const { state, saveCreds } = await useMultiFileAuthState(this.authFolder);
+      const { state, saveCreds } = await useMultiFileAuthState(authFolder);
 
       let versionTuple = [2, 3000, 1015901307];
       if (fetchLatestBaileysVersion) {
@@ -206,9 +221,10 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
   }
 
   private clearSession() {
-    if (fs.existsSync(this.authFolder)) {
+    const authFolder = this.getAuthFolder();
+    if (fs.existsSync(authFolder)) {
       try {
-        fs.rmSync(this.authFolder, { recursive: true, force: true });
+        fs.rmSync(authFolder, { recursive: true, force: true });
       } catch { }
     }
   }
