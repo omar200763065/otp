@@ -10,7 +10,7 @@ import { Role } from '../../common/enums';
 @ApiTags('Admin WhatsApp Management')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller(['admin/whatsapp', 'api/admin/whatsapp', 'whatsapp'])
+@Controller(['admin/whatsapp', 'api/admin/whatsapp', 'whatsapp', 'api/whatsapp'])
 export class WhatsAppController {
   constructor(
     private readonly whatsAppService: WhatsAppService,
@@ -18,7 +18,7 @@ export class WhatsAppController {
   ) {}
 
   @ApiOperation({ summary: 'Get WhatsApp Provider status and QR Code status' })
-  @Get('status')
+  @Get(['status', ''])
   async getStatus() {
     const providerMode = this.whatsAppService.getProviderMode();
     const baileysStatus = this.baileysService.getStatus();

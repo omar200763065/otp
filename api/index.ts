@@ -56,31 +56,43 @@ async function bootstrapServer() {
 }
 
 export default async (req: any, res: any) => {
-  await bootstrapServer();
+  try {
+    await bootstrapServer();
 
-  // Extract explicit __url query parameter passed by Vercel route rewrite
-  let targetUrl = '';
-  if (req.url) {
-    try {
-      const parsed = new URL(req.url, 'http://localhost');
-      const paramUrl = parsed.searchParams.get('__url');
-      if (paramUrl) {
-        targetUrl = paramUrl;
-      }
-    } catch {}
+    // Extract explicit __url query parameter passed by Vercel route rewrite
+    let targetUrl = '';
+    if (req.url) {
+      try {
+        const parsed = new URL(req.url, 'http://localhost');
+        const paramUrl = parsed.searchParams.get('__url');
+        if (paramUrl) {
+          targetUrl = paramUrl;
+        }
+      } catch {}
+    }
+
+    if (!targetUrl) {
+      targetUrl = req.headers['x-matched-path'] || req.headers['x-original-url'] || req.url;
+    }
+
+    if (targetUrl && targetUrl.startsWith('/api/index.ts')) {
+      targetUrl = targetUrl.replace('/api/index.ts', '') || '/';
+    }
+
+    if (targetUrl) {
+      req.url = targetUrl;
+      req.originalUrl = targetUrl;
+      delete (req as any)._parsedUrl;
+      delete (req as any)._parsedUrlUrl;
+    }
+
+    server(req, res);
+  } catch (err: any) {
+    console.error('Vercel Serverless Execution Error:', err);
+    res.status(500).json({
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: err.message || String(err),
+    });
   }
-
-  if (!targetUrl) {
-    targetUrl = req.headers['x-matched-path'] || req.headers['x-original-url'] || req.url;
-  }
-
-  if (targetUrl && targetUrl.startsWith('/api/index.ts')) {
-    targetUrl = targetUrl.replace('/api/index.ts', '') || '/';
-  }
-
-  if (targetUrl) {
-    req.url = targetUrl;
-  }
-
-  server(req, res);
 };
