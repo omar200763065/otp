@@ -4,6 +4,7 @@
   "description": "Production-grade Enterprise OTP Platform Monorepo",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate --schema=backend/prisma/schema.prisma",
     "vercel-build": "npx prisma generate --schema=backend/prisma/schema.prisma",
     "build:backend": "cd backend && npm run build",
     "build:frontend": "cd frontend && npm run build"
