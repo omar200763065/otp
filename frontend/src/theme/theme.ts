@@ -8,15 +8,15 @@ export const getCustomTheme = (mode: 'dark' | 'light', direction: 'rtl' | 'ltr')
     palette: {
       mode,
       primary: {
-        main: '#6366f1', // Electric Indigo
-        light: '#818cf8',
-        dark: '#4f46e5',
+        main: '#0d9488', // Emerald Turquoise Teal (أخضر فيروزي)
+        light: '#2dd4bf', // Light Turquoise Mint
+        dark: '#0f766e',  // Deep Forest Teal
         contrastText: '#ffffff',
       },
       secondary: {
-        main: '#a855f7', // Purple Neon
-        light: '#c084fc',
-        dark: '#9333ea',
+        main: '#06b6d4', // Electric Cyan
+        light: '#38bdf8',
+        dark: '#0891b2',
       },
       success: {
         main: '#10b981', // Emerald Active
@@ -29,12 +29,12 @@ export const getCustomTheme = (mode: 'dark' | 'light', direction: 'rtl' | 'ltr')
         main: '#ef4444',
       },
       background: {
-        default: isDark ? '#090d16' : '#f1f5f9',
-        paper: isDark ? 'rgba(15, 23, 42, 0.75)' : 'rgba(255, 255, 255, 0.85)',
+        default: isDark ? '#041316' : '#f0fdfa',
+        paper: isDark ? 'rgba(8, 36, 42, 0.75)' : 'rgba(255, 255, 255, 0.88)',
       },
       text: {
-        primary: isDark ? '#f8fafc' : '#0f172a',
-        secondary: isDark ? '#94a3b8' : '#64748b',
+        primary: isDark ? '#f0fdfa' : '#0f172a',
+        secondary: isDark ? '#99f6e4' : '#5eead4',
       },
     },
     typography: {
@@ -53,14 +53,14 @@ export const getCustomTheme = (mode: 'dark' | 'light', direction: 'rtl' | 'ltr')
         styleOverrides: {
           root: {
             backgroundImage: isDark 
-              ? 'linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)' 
-              : 'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%)',
+              ? 'linear-gradient(135deg, rgba(45, 212, 191, 0.04) 0%, rgba(6, 182, 212, 0.02) 100%)' 
+              : 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240, 253, 250, 0.8) 100%)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.06)',
+            border: isDark ? '1px solid rgba(45, 212, 191, 0.15)' : '1px solid rgba(13, 148, 136, 0.1)',
             boxShadow: isDark 
-              ? '0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 1px inset rgba(255,255,255,0.1)' 
-              : '0 20px 40px -15px rgba(0, 0, 0, 0.06)',
+              ? '0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 1px inset rgba(45, 212, 191, 0.2)' 
+              : '0 20px 40px -15px rgba(13, 148, 136, 0.08)',
             transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease',
           },
         },
@@ -73,7 +73,7 @@ export const getCustomTheme = (mode: 'dark' | 'light', direction: 'rtl' | 'ltr')
             fontSize: '0.92rem',
             boxShadow: 'none',
             '&:hover': {
-              boxShadow: '0 8px 20px rgba(99, 102, 241, 0.3)',
+              boxShadow: '0 8px 20px rgba(13, 148, 136, 0.4)',
               transform: 'translateY(-1px)',
             },
           },
@@ -84,16 +84,16 @@ export const getCustomTheme = (mode: 'dark' | 'light', direction: 'rtl' | 'ltr')
           root: {
             '& .MuiOutlinedInput-root': {
               borderRadius: 14,
-              backgroundColor: isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(255, 255, 255, 0.6)',
+              backgroundColor: isDark ? 'rgba(4, 19, 22, 0.4)' : 'rgba(255, 255, 255, 0.7)',
               backdropFilter: 'blur(8px)',
               '& fieldset': {
-                borderColor: isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)',
+                borderColor: isDark ? 'rgba(45, 212, 191, 0.2)' : 'rgba(13, 148, 136, 0.2)',
               },
               '&:hover fieldset': {
-                borderColor: '#818cf8',
+                borderColor: '#2dd4bf',
               },
               '&.Mui-focused fieldset': {
-                borderColor: '#6366f1',
+                borderColor: '#0d9488',
                 borderWidth: 2,
               },
             },

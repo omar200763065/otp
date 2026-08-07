@@ -33,38 +33,38 @@ export const DashboardLayout: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', background: 'radial-gradient(ellipse at top, #1e1b4b 0%, #0b0f19 70%)' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', background: 'radial-gradient(ellipse at top, #042f2e 0%, #041316 70%)' }}>
       {/* Top Navbar */}
       <AppBar 
         position="fixed" 
         sx={{ 
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          backdropFilter: 'blur(16px)',
-          backgroundColor: mode === 'dark' ? 'rgba(11, 15, 25, 0.75)' : 'rgba(255, 255, 255, 0.75)',
+          backdropFilter: 'blur(20px)',
+          backgroundColor: mode === 'dark' ? 'rgba(4, 19, 22, 0.8)' : 'rgba(255, 255, 255, 0.8)',
           boxShadow: 'none',
-          borderBottom: mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+          borderBottom: mode === 'dark' ? '1px solid rgba(45, 212, 191, 0.15)' : '1px solid rgba(13, 148, 136, 0.15)',
         }}
       >
         <Toolbar sx={{ justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box 
               sx={{ 
-                width: 40, 
-                height: 40, 
-                borderRadius: 3, 
-                background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                width: 42, 
+                height: 42, 
+                borderRadius: 3.5, 
+                background: 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
+                boxShadow: '0 4px 18px rgba(13, 148, 136, 0.4)',
               }}
             >
               <ShieldCheck color="#ffffff" size={24} />
             </Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, background: 'linear-gradient(90deg, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, background: 'linear-gradient(90deg, #2dd4bf, #38bdf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               {t('platformTitle')}
             </Typography>
-            <Chip label="v1.0 Enterprise" size="small" color="primary" sx={{ height: 22, fontSize: '0.7rem', fontWeight: 700 }} />
+            <Chip label="v1.0 Enterprise" size="small" color="primary" sx={{ height: 24, fontSize: '0.75rem', fontWeight: 700, borderRadius: 2 }} />
           </Box>
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -78,15 +78,15 @@ export const DashboardLayout: React.FC = () => {
 
             {/* Dark/Light Mode Toggle */}
             <IconButton onClick={toggleColorMode} color="inherit">
-              {mode === 'dark' ? <Sun size={20} color="#facc15" /> : <Moon size={20} color="#6366f1" />}
+              {mode === 'dark' ? <Sun size={20} color="#facc15" /> : <Moon size={20} color="#0d9488" />}
             </IconButton>
 
             {/* User Profile */}
             <Box 
               onClick={(e) => setAnchorEl(e.currentTarget)} 
-              sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', pl: 1, pr: 1, py: 0.5, borderRadius: 3, '&:hover': { background: 'rgba(255, 255, 255, 0.05)' } }}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', pl: 1, pr: 1, py: 0.5, borderRadius: 3, '&:hover': { background: 'rgba(45, 212, 191, 0.1)' } }}
             >
-              <Avatar sx={{ width: 34, height: 34, bgcolor: '#6366f1', fontSize: '0.9rem', fontWeight: 700 }}>
+              <Avatar sx={{ width: 36, height: 36, bgcolor: '#0d9488', fontSize: '0.95rem', fontWeight: 800 }}>
                 {user?.name?.charAt(0) || 'A'}
               </Avatar>
               <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
@@ -123,10 +123,10 @@ export const DashboardLayout: React.FC = () => {
           '& .MuiDrawer-paper': {
             width: drawerWidth,
             boxSizing: 'border-box',
-            backgroundColor: mode === 'dark' ? 'rgba(11, 15, 25, 0.5)' : 'rgba(255, 255, 255, 0.5)',
-            backdropFilter: 'blur(16px)',
-            borderRight: mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
-            borderLeft: mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.05)' : '1px solid rgba(0, 0, 0, 0.05)',
+            backgroundColor: mode === 'dark' ? 'rgba(4, 19, 22, 0.6)' : 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(20px)',
+            borderRight: mode === 'dark' ? '1px solid rgba(45, 212, 191, 0.12)' : '1px solid rgba(13, 148, 136, 0.12)',
+            borderLeft: mode === 'dark' ? '1px solid rgba(45, 212, 191, 0.12)' : '1px solid rgba(13, 148, 136, 0.12)',
           },
         }}
       >
@@ -142,15 +142,15 @@ export const DashboardLayout: React.FC = () => {
                     selected={isSelected}
                     sx={{
                       borderRadius: 3,
-                      py: 1.2,
+                      py: 1.3,
                       px: 2,
-                      transition: 'all 0.2s ease-in-out',
+                      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&.Mui-selected': {
-                        backgroundColor: '#6366f1',
+                        background: 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)',
                         color: '#ffffff',
-                        boxShadow: '0 4px 15px rgba(99, 102, 241, 0.4)',
+                        boxShadow: '0 6px 20px rgba(13, 148, 136, 0.4)',
                         '& .MuiListItemIcon-root': { color: '#ffffff' },
-                        '&:hover': { backgroundColor: '#4f46e5' },
+                        '&:hover': { background: 'linear-gradient(135deg, #0f766e 0%, #0891b2 100%)' },
                       },
                     }}
                   >
@@ -167,7 +167,7 @@ export const DashboardLayout: React.FC = () => {
       </Drawer>
 
       {/* Main View Container */}
-      <Box component="main" sx={{ flexGrow: 1, p: 3, pt: 11, width: `calc(100% - ${drawerWidth}px)` }}>
+      <Box component="main" sx={{ flexGrow: 1, p: 3.5, pt: 11.5, width: `calc(100% - ${drawerWidth}px)` }}>
         <Outlet />
       </Box>
     </Box>
