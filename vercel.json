@@ -1,18 +1,41 @@
 {
-  "buildCommand": "npx prisma generate --schema=backend/prisma/schema.prisma && cd frontend && npm run build",
-  "outputDirectory": "frontend/dist",
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/admin/(.*)",
-      "destination": "/api/admin/$1"
+      "src": "api/index.ts",
+      "use": "@vercel/node"
     },
     {
-      "source": "/otp/(.*)",
-      "destination": "/api/otp/$1"
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api",
+      "dest": "api/index"
     },
     {
-      "source": "/((?!api/|assets/|favicon.ico).*)",
-      "destination": "/index.html"
+      "src": "/api/(.*)",
+      "dest": "api/index"
+    },
+    {
+      "src": "/admin/(.*)",
+      "dest": "api/index"
+    },
+    {
+      "src": "/otp/(.*)",
+      "dest": "api/index"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
