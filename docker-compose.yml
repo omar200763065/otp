@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Database Service
+  postgres:
+    image: postgres:16-alpine
+    container_name: otp_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: otp_user
+      POSTGRES_PASSWORD: SuperSecretPassword123!
+      POSTGRES_DB: otp_platform_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U otp_user -d otp_platform_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis Cache & Queue Service
+  redis:
+    image: redis:7-alpine
+    container_name: otp_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 3. NestJS Backend API Service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: otp_backend
+    restart: always
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://otp_user:SuperSecretPassword123!@postgres:5432/otp_platform_db?schema=public"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: super_secret_jwt_key_enterprise_otp_2026_change_me!
+      OTP_HMAC_SECRET: super_secret_otp_hmac_hash_key_2026!
+      OTP_EXPIRATION_MINUTES: 5
+      OTP_MAX_ATTEMPTS: 3
+      OTP_RESEND_COOLDOWN_SECONDS: 60
+      WHATSAPP_API_URL: https://graph.facebook.com/v18.0
+      WHATSAPP_PHONE_NUMBER_ID: 123456789012345
+      WHATSAPP_ACCESS_TOKEN: EAAG...YOUR_ACCESS_TOKEN_HERE
+      INITIAL_ADMIN_EMAIL: admin@otpsaas.com
+      INITIAL_ADMIN_PASSWORD: AdminPassword123!
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+
+  # 4. React 19 Frontend + Nginx Reverse Proxy Gateway
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: otp_gateway
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  redis_data:

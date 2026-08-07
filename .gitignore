@@ -1,0 +1,24 @@
+# Node modules
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# Environment variables
+.env
+backend/.env
+frontend/.env
+
+# Build outputs
+dist/
+backend/dist/
+frontend/dist/
+build/
+
+# Baileys session data
+baileys_auth_info/
+backend/baileys_auth_info/
+
+# Logs & temp
+*.log
+npm-debug.log*
+.DS_Store

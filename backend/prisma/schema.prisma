@@ -1,0 +1,222 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  OPERATOR
+  VIEWER
+}
+
+enum OtpStatus {
+  PENDING
+  VERIFIED
+  EXPIRED
+  CANCELLED
+  FAILED
+}
+
+enum Channel {
+  WHATSAPP
+  SMS
+  EMAIL
+}
+
+enum IpRuleType {
+  BLACKLIST
+  WHITELIST
+}
+
+enum KeyType {
+  LIVE
+  TEST
+}
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  passwordHash  String
+  name          String
+  role          Role       @default(OPERATOR)
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model Tenant {
+  id            String            @id @default(uuid())
+  name          String
+  email         String            @unique
+  companyName   String?
+  status        String            @default("ACTIVE")
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  apps          App[]
+  whatsappConfigs WhatsAppConfig[]
+  webhooks      WebhookEndpoint[]
+
+  @@map("tenants")
+}
+
+model App {
+  id            String           @id @default(uuid())
+  tenantId      String
+  name          String
+  slug          String           @unique
+  description   String?
+  isActive      Boolean          @default(true)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  tenant        Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  apiKeys       ApiKey[]
+  otpTransactions OtpTransaction[]
+
+  @@map("apps")
+}
+
+model ApiKey {
+  id            String    @id @default(uuid())
+  appId         String
+  name          String
+  keyPrefix     String    // e.g. otp_live_a1b2 or otp_test_x9y8
+  keyHash       String    @unique
+  type          KeyType   @default(LIVE)
+  isActive      Boolean   @default(true)
+  lastUsedAt    DateTime?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  app           App       @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+model OtpTransaction {
+  id                String    @id @default(uuid())
+  appId             String
+  phoneNumber       String    // E.164 format, e.g. +966500000000
+  channel           Channel   @default(WHATSAPP)
+  otpHash           String    // HMAC/SHA-256 hashed OTP code
+  status            OtpStatus @default(PENDING)
+  attempts          Int       @default(0)
+  maxAttempts       Int       @default(3)
+  resendCount       Int       @default(0)
+  expiresAt         DateTime
+  verifiedAt        DateTime?
+  ipAddress         String?
+  userAgent         String?
+  deviceFingerprint String?
+  meta              Json?     // Extra context e.g. app version, country
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  app               App       @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@index([phoneNumber, status])
+  @@index([appId, createdAt])
+  @@map("otp_transactions")
+}
+
+model WhatsAppConfig {
+  id                String   @id @default(uuid())
+  tenantId          String
+  phoneNumberId     String
+  businessAccountId String
+  accessToken       String
+  senderPhoneNumber String?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  tenant            Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  templates         MessageTemplate[]
+
+  @@map("whatsapp_configs")
+}
+
+model MessageTemplate {
+  id               String         @id @default(uuid())
+  whatsappConfigId String
+  name             String         // Template name in Meta Manager e.g. "otp_verify"
+  language         String         @default("ar")
+  bodyText         String         // e.g. "كود التحقق الخاص بك هو: {{1}}"
+  category         String         @default("AUTHENTICATION")
+  status           String         @default("APPROVED")
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  whatsappConfig   WhatsAppConfig @relation(fields: [whatsappConfigId], references: [id], onDelete: Cascade)
+
+  @@map("message_templates")
+}
+
+model IpRule {
+  id          String     @id @default(uuid())
+  type        IpRuleType @default(BLACKLIST)
+  value       String     // IP, CIDR, or Phone Country Prefix (e.g. +966 or 192.168.1.1)
+  reason      String?
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("ip_rules")
+}
+
+model WebhookEndpoint {
+  id          String       @id @default(uuid())
+  tenantId    String
+  url         String
+  secret      String
+  events      String[]     // e.g. ["otp.sent", "otp.verified", "otp.failed"]
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  logs        WebhookLog[]
+
+  @@map("webhook_endpoints")
+}
+
+model WebhookLog {
+  id               String          @id @default(uuid())
+  webhookEndpointId String
+  event            String
+  payload          Json
+  responseCode     Int?
+  responseBody     String?
+  attempts         Int             @default(1)
+  isSuccess        Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+
+  webhookEndpoint  WebhookEndpoint @relation(fields: [webhookEndpointId], references: [id], onDelete: Cascade)
+
+  @@map("webhook_logs")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  userEmail   String?
+  action      String   // e.g. "CREATE_API_KEY", "DELETE_APP", "UPDATE_SECURITY_RULE"
+  resource    String   // e.g. "ApiKey:123"
+  details     Json?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("audit_logs")
+}
