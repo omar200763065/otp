@@ -23,6 +23,10 @@
       "dest": "/api/index.ts"
     },
     {
+      "src": "/otp/(.*)",
+      "dest": "/api/index.ts"
+    },
+    {
       "handle": "filesystem"
     },
     {

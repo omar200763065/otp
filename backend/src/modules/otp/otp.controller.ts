@@ -7,14 +7,14 @@ import { ApiKeyGuard } from '../../common/guards/api-key.guard';
 @ApiTags('OTP Service')
 @ApiHeader({ name: 'x-api-key', description: 'App Live or Test API Key (e.g. otp_live_...)', required: true })
 @UseGuards(ApiKeyGuard)
-@Controller('api/v1')
+@Controller(['api/v1', 'api/v1/otp', 'otp'])
 export class OtpController {
   constructor(private readonly otpService: OtpService) {}
 
   @ApiOperation({ summary: 'Send OTP code via WhatsApp' })
   @ApiResponse({ status: 200, description: 'OTP generated and dispatched successfully' })
   @HttpCode(HttpStatus.OK)
-  @Post('send-otp')
+  @Post(['send-otp', 'send', 'otp/send'])
   async sendOtp(@Body() dto: SendOtpDto, @Request() req: any) {
     const appId = req.appEntity.id;
     const clientIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
@@ -25,7 +25,7 @@ export class OtpController {
   @ApiOperation({ summary: 'Verify OTP code' })
   @ApiResponse({ status: 200, description: 'OTP verified successfully' })
   @HttpCode(HttpStatus.OK)
-  @Post('verify-otp')
+  @Post(['verify-otp', 'verify', 'otp/verify'])
   async verifyOtp(@Body() dto: VerifyOtpDto, @Request() req: any) {
     const appId = req.appEntity.id;
     const clientIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
@@ -35,7 +35,7 @@ export class OtpController {
   @ApiOperation({ summary: 'Resend OTP code' })
   @ApiResponse({ status: 200, description: 'OTP resent successfully' })
   @HttpCode(HttpStatus.OK)
-  @Post('resend-otp')
+  @Post(['resend-otp', 'resend', 'otp/resend'])
   async resendOtp(@Body() dto: ResendOtpDto, @Request() req: any) {
     const appId = req.appEntity.id;
     const clientIp = req.ip || req.connection.remoteAddress || '127.0.0.1';
@@ -45,7 +45,7 @@ export class OtpController {
   @ApiOperation({ summary: 'Cancel pending OTP code' })
   @ApiResponse({ status: 200, description: 'OTP cancelled' })
   @HttpCode(HttpStatus.OK)
-  @Post('cancel-otp')
+  @Post(['cancel-otp', 'cancel', 'otp/cancel'])
   async cancelOtp(@Body() dto: CancelOtpDto, @Request() req: any) {
     const appId = req.appEntity.id;
     return this.otpService.cancelOtp(dto, appId);

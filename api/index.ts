@@ -57,5 +57,15 @@ async function bootstrapServer() {
 
 export default async (req: any, res: any) => {
   await bootstrapServer();
+
+  // In Vercel serverless environment, rewrites/routes may alter req.url to /api/index.ts.
+  // Extract true request URI from x-matched-path or x-original-url if available.
+  const matchedPath = req.headers['x-matched-path'] || req.headers['x-original-url'];
+  if (matchedPath && typeof matchedPath === 'string') {
+    req.url = matchedPath;
+  } else if (req.url && req.url.startsWith('/api/index.ts')) {
+    req.url = req.url.replace('/api/index.ts', '') || '/';
+  }
+
   server(req, res);
 };

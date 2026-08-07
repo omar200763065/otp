@@ -11,7 +11,7 @@ export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
   @ApiOperation({ summary: 'Get SaaS Platform Overview Analytics & System Health' })
-  @Get('overview')
+  @Get(['overview', ''])
   async getOverview() {
     return this.dashboardService.getOverviewStats();
   }
