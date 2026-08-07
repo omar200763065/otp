@@ -11,54 +11,83 @@ import * as path from 'path';
 if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
   const tmpDbPath = '/tmp/dev.db';
   if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes('./dev.db')) {
-    const seedDbPath1 = path.join(process.cwd(), 'backend', 'prisma', 'dev.db');
-    const seedDbPath2 = path.join(process.cwd(), '..', 'backend', 'prisma', 'dev.db');
-    const seedDbPath = fs.existsSync(seedDbPath1) ? seedDbPath1 : seedDbPath2;
-    try {
-      if (!fs.existsSync(tmpDbPath) && fs.existsSync(seedDbPath)) {
-        fs.copyFileSync(seedDbPath, tmpDbPath);
-      }
-    } catch (e) {
-      console.warn('Could not copy SQLite seed DB to /tmp:', e);
+    const seedPaths = [
+      path.join(process.cwd(), 'backend', 'prisma', 'dev.db'),
+      path.join(process.cwd(), '..', 'backend', 'prisma', 'dev.db'),
+      path.join(__dirname, '..', 'backend', 'prisma', 'dev.db'),
+      path.join(__dirname, '../../backend/prisma/dev.db'),
+    ];
+
+    let copied = false;
+    for (const p of seedPaths) {
+      try {
+        if (fs.existsSync(p) && fs.statSync(p).size > 0) {
+          fs.copyFileSync(p, tmpDbPath);
+          copied = true;
+          break;
+        }
+      } catch (e) {}
     }
+
+    if (!copied && !fs.existsSync(tmpDbPath)) {
+      try {
+        fs.writeFileSync(tmpDbPath, '');
+      } catch (e) {}
+    }
+
     process.env.DATABASE_URL = `file:${tmpDbPath}`;
   }
 }
 
 const server = express();
 let isInitialized = false;
+let initError: any = null;
 
 async function bootstrapServer() {
   if (!isInitialized) {
-    const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
-    
-    app.enableCors({
-      origin: '*',
-      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-      credentials: true,
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
-    });
+    try {
+      const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+      
+      app.enableCors({
+        origin: '*',
+        methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+      });
 
-    app.useGlobalInterceptors(new SanitizationInterceptor());
+      app.useGlobalInterceptors(new SanitizationInterceptor());
 
-    app.useGlobalPipes(
-      new ValidationPipe({
-        whitelist: true,
-        transform: true,
-        forbidNonWhitelisted: true,
-        transformOptions: {
-          enableImplicitConversion: true,
-        },
-      }),
-    );
+      app.useGlobalPipes(
+        new ValidationPipe({
+          whitelist: true,
+          transform: true,
+          forbidNonWhitelisted: true,
+          transformOptions: {
+            enableImplicitConversion: true,
+          },
+        }),
+      );
 
-    await app.init();
-    isInitialized = true;
+      await app.init();
+      isInitialized = true;
+    } catch (err: any) {
+      initError = err;
+      console.error('NestJS Bootstrap Initialization Error:', err);
+      throw err;
+    }
   }
 }
 
 export default async (req: any, res: any) => {
   try {
+    if (initError) {
+      return res.status(500).json({
+        statusCode: 500,
+        error: 'Bootstrap Error',
+        message: initError.message || String(initError),
+      });
+    }
+
     await bootstrapServer();
 
     let rawPath =
@@ -80,6 +109,7 @@ export default async (req: any, res: any) => {
       statusCode: 500,
       error: 'Internal Server Error',
       message: err.message || String(err),
+      stack: err.stack,
     });
   }
 };
