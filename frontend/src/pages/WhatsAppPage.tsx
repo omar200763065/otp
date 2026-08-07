@@ -12,13 +12,13 @@ export const WhatsAppPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [statusData, setStatusData] = useState<any>(null);
 
-  // Meta Form States (Empty initially for user to input)
+  // Meta Form States
   const [phoneNumberId, setPhoneNumberId] = useState('');
   const [businessAccountId, setBusinessAccountId] = useState('');
   const [token, setToken] = useState('');
   const [saved, setSaved] = useState(false);
 
-  // Quick Dispatcher Test (Empty initially)
+  // Quick Dispatcher Test
   const [testPhone, setTestPhone] = useState('');
   const [testCode, setTestCode] = useState('849201');
   const [sendingTest, setSendingTest] = useState(false);
@@ -37,7 +37,7 @@ export const WhatsAppPage: React.FC = () => {
 
   useEffect(() => {
     fetchStatus();
-    const interval = setInterval(fetchStatus, 4000);
+    const interval = setInterval(fetchStatus, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -51,11 +51,26 @@ export const WhatsAppPage: React.FC = () => {
   };
 
   const handleDisconnect = async () => {
+    setLoading(true);
     try {
       await api.post('/admin/whatsapp/disconnect');
-      fetchStatus();
+      await fetchStatus();
     } catch (err: any) {
       console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegenerateQR = async () => {
+    setLoading(true);
+    try {
+      await api.post('/admin/whatsapp/disconnect');
+      await fetchStatus();
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -82,9 +97,9 @@ export const WhatsAppPage: React.FC = () => {
 
   const providerMode = statusData?.providerMode || 'BAILEYS_QR';
   const baileys = statusData?.baileys || { 
-    status: statusData?.baileys?.status || 'DISCONNECTED', 
-    connectedPhoneNumber: statusData?.baileys?.connectedPhoneNumber || null,
-    qrDataUrl: statusData?.baileys?.qrDataUrl || null 
+    status: 'DISCONNECTED', 
+    connectedPhoneNumber: null,
+    qrDataUrl: null 
   };
 
   return (
@@ -96,7 +111,7 @@ export const WhatsAppPage: React.FC = () => {
             إدارة بوابة الواتساب (WhatsApp Engine)
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            ربط رقم الواتساب الخاص بك عبر مسح كود QR Code أو استخدام حساب Meta Cloud API الرسمي
+            ربط رقم الواتساب الخاص بك عبر مسح كود QR Code الصالح أو باستخدام حساب Meta Cloud API
           </Typography>
         </Box>
 
@@ -104,7 +119,7 @@ export const WhatsAppPage: React.FC = () => {
           <Typography variant="body2" sx={{ fontWeight: 700 }}>المحرك المفعل:</Typography>
           <Chip 
             icon={<ShieldCheck size={16} color="#ffffff" />}
-            label={providerMode === 'BAILEYS_QR' ? 'ربط QR Code (WhatsApp Web)' : 'Meta Cloud API الرسمي'} 
+            label={providerMode === 'BAILEYS_QR' ? 'ربط QR Code الصالح (WhatsApp Web)' : 'Meta Cloud API الرسمي'} 
             color="primary" 
             sx={{ fontWeight: 800, px: 1, background: 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)' }}
           />
@@ -122,7 +137,7 @@ export const WhatsAppPage: React.FC = () => {
             '& .MuiTabs-indicator': { backgroundColor: '#2dd4bf', height: 3 }
           }}
         >
-          <Tab icon={<QrCode size={20} />} iconPosition="start" label="ربط رقمك الخاص عبر كود QR Code (WhatsApp Web)" />
+          <Tab icon={<QrCode size={20} />} iconPosition="start" label="ربط رقمك الخاص عبر كود QR Code الصالح" />
           <Tab icon={<MessageSquare size={20} />} iconPosition="start" label="WhatsApp Business Cloud API (Meta)" />
         </Tabs>
       </Box>
@@ -134,7 +149,7 @@ export const WhatsAppPage: React.FC = () => {
             <Paper sx={{ p: 4, borderRadius: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 2.5 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                 <Typography variant="h6" sx={{ fontWeight: 800 }}>
-                  ربط رقم الواتساب الخاص بك
+                  حالة اتصال الواتساب ورمز الـ QR Code
                 </Typography>
                 {providerMode !== 'BAILEYS_QR' && (
                   <Button 
@@ -155,11 +170,11 @@ export const WhatsAppPage: React.FC = () => {
                     <CheckCircle2 size={50} color="#10b981" />
                   </Box>
                   <Typography variant="h5" sx={{ fontWeight: 800, color: '#10b981' }}>
-                    تم ربط رقمك بالواتساب بنجاح!
+                    تم ربط رقمك بالواتساب بنجاح وهو متصل حالياً!
                   </Typography>
                   <Chip 
                     icon={<Smartphone size={18} color="#2dd4bf" />} 
-                    label={`الرقم المربوط: +${baileys.connectedPhoneNumber}`} 
+                    label={`الرقم المربوط بالمحرك: +${baileys.connectedPhoneNumber}`} 
                     variant="outlined"
                     sx={{ fontWeight: 800, fontSize: '1rem', py: 2.2, px: 1.5, borderRadius: 3.5, borderColor: 'rgba(45, 212, 191, 0.4)', color: '#2dd4bf' }}
                   />
@@ -170,14 +185,14 @@ export const WhatsAppPage: React.FC = () => {
                     onClick={handleDisconnect}
                     sx={{ mt: 1, borderRadius: 3, fontWeight: 700 }}
                   >
-                    فصل الرقم ومسح رمز آخر
+                    فصل الرقم ومسح كود جديد
                   </Button>
                 </Box>
-              ) : (
+              ) : baileys.qrDataUrl ? (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    افتح الواتساب على هاتفك &gt; الأجهزة المرتبطة &gt; ربط جهاز &gt; امسح الرمز أدناه برقمك الخاص:
-                  </Typography>
+                  <Alert severity="info" sx={{ borderRadius: 3, fontWeight: 700, maxWidth: 460 }}>
+                    افتح الواتساب على هاتفك &gt; الأجهزة المرتبطة &gt; ربط جهاز &gt; وجه الكاميرا للمربع أدناه:
+                  </Alert>
 
                   <Box 
                     sx={{ 
@@ -189,18 +204,48 @@ export const WhatsAppPage: React.FC = () => {
                     }}
                   >
                     <img 
-                      src={baileys.qrDataUrl || 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=YOUR_CUSTOM_WHATSAPP_SESSION'} 
-                      alt="WhatsApp QR Code" 
-                      style={{ width: 240, height: 240, display: 'block' }} 
+                      src={baileys.qrDataUrl} 
+                      alt="WhatsApp Web Valid Pairing QR Code" 
+                      style={{ width: 250, height: 250, display: 'block' }} 
                     />
                   </Box>
 
-                  <Chip 
-                    icon={<RefreshCw size={14} className="animate-spin" color="#2dd4bf" />} 
-                    label="بانتظار مسح الرمز برقمك الخاص..." 
-                    variant="outlined"
-                    sx={{ fontWeight: 800, borderRadius: 3, color: '#2dd4bf', borderColor: 'rgba(45, 212, 191, 0.3)' }}
-                  />
+                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+                    <Chip 
+                      icon={<RefreshCw size={14} className="animate-spin" color="#2dd4bf" />} 
+                      label="رمز QR صادر ومجهز للمسح حالياً..." 
+                      variant="outlined"
+                      sx={{ fontWeight: 800, borderRadius: 3, color: '#2dd4bf', borderColor: 'rgba(45, 212, 191, 0.3)' }}
+                    />
+                    <Button 
+                      size="small" 
+                      variant="text" 
+                      onClick={handleRegenerateQR} 
+                      startIcon={<RefreshCw size={14} />} 
+                      sx={{ fontWeight: 800, color: '#38bdf8' }}
+                    >
+                      إعادة توليد كود جديد
+                    </Button>
+                  </Box>
+                </Box>
+              ) : (
+                <Box sx={{ py: 6, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5 }}>
+                  <CircularProgress size={44} color="primary" />
+                  <Typography variant="body1" sx={{ fontWeight: 800, color: '#2dd4bf' }}>
+                    جاري توليد كود QR Code الصالح من خادم الواتساب المباشر...
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 420 }}>
+                    يرجى الانتظار بضع ثوانٍ بينما يتم تشغيل جلسة اتصال الواتساب وإنشاء رمز اقتران معتمد.
+                  </Typography>
+                  <Button 
+                    variant="outlined" 
+                    size="small"
+                    onClick={handleRegenerateQR}
+                    startIcon={<RefreshCw size={16} />}
+                    sx={{ borderRadius: 3, fontWeight: 800, mt: 1, borderColor: 'rgba(45, 212, 191, 0.3)', color: '#2dd4bf' }}
+                  >
+                    بدء جلسة QR جديدة الآن
+                  </Button>
                 </Box>
               )}
             </Paper>

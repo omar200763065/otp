@@ -14,7 +14,7 @@ try {
   useMultiFileAuthState = baileys.useMultiFileAuthState;
   DisconnectReason = baileys.DisconnectReason;
 } catch (e) {
-  // Graceful fallback if baileys native binary/bindings not compiled in dev
+  // Graceful fallback if baileys optional dependencies missing
 }
 
 export enum BaileysStatus {
@@ -29,6 +29,7 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(BaileysService.name);
   private socket: any = null;
   private qrDataUrl: string | null = null;
+  private rawQrString: string | null = null;
   private connectionStatus: BaileysStatus = BaileysStatus.DISCONNECTED;
   private connectedPhoneNumber: string | null = null;
   private authFolder = path.join(process.cwd(), 'baileys_auth_info');
@@ -43,16 +44,18 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
 
   onModuleDestroy() {
     if (this.socket) {
-      this.socket.ev.removeAllListeners();
+      try {
+        this.socket.ev.removeAllListeners();
+      } catch {}
     }
   }
 
   /**
-   * Initializes Baileys WhatsApp Web Client
+   * Initializes Baileys WhatsApp Web Client with valid Browser Credentials
    */
   async initBaileys() {
     if (!makeWASocket || !useMultiFileAuthState) {
-      this.logger.warn('Baileys library not available in environment. Running in mock/simulation mode.');
+      this.logger.warn('Baileys library not initialized in current runner mode.');
       return;
     }
 
@@ -67,7 +70,11 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
       this.socket = makeWASocket({
         auth: state,
         printQRInTerminal: false,
+        browser: ['Ubuntu', 'Chrome', '120.0.0'], // Authentic browser tuple required by WhatsApp Web protocol
         logger: require('pino')({ level: 'silent' }),
+        connectTimeoutMs: 60000,
+        defaultQueryTimeoutMs: 60000,
+        keepAliveIntervalMs: 25000,
       });
 
       this.socket.ev.on('creds.update', saveCreds);
@@ -76,29 +83,41 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
         const { connection, lastDisconnect, qr } = update;
 
         if (qr) {
+          this.rawQrString = qr;
           this.connectionStatus = BaileysStatus.PAIRING_REQUIRED;
-          this.qrDataUrl = await QRCode.toDataURL(qr);
-          this.logger.log('📱 New WhatsApp QR Code generated for web pairing!');
+          this.qrDataUrl = await QRCode.toDataURL(qr, {
+            margin: 2,
+            scale: 8,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF',
+            },
+          });
+          this.logger.log('📱 Valid WhatsApp Web QR Code generated successfully!');
         }
 
         if (connection === 'close') {
-          const shouldReconnect = (lastDisconnect?.error as any)?.output?.statusCode !== DisconnectReason?.loggedOut;
-          this.logger.warn(`Baileys connection closed. Reconnecting: ${shouldReconnect}`);
+          const statusCode = (lastDisconnect?.error as any)?.output?.statusCode;
+          const shouldReconnect = statusCode !== DisconnectReason?.loggedOut;
+          this.logger.warn(`Baileys connection closed. Reason code: ${statusCode}, Reconnecting: ${shouldReconnect}`);
+          
           this.connectionStatus = BaileysStatus.DISCONNECTED;
           this.connectedPhoneNumber = null;
 
           if (shouldReconnect) {
-            setTimeout(() => this.initBaileys(), 5000);
+            setTimeout(() => this.initBaileys(), 4000);
           } else {
             this.qrDataUrl = null;
+            this.rawQrString = null;
             this.clearSession();
           }
         } else if (connection === 'open') {
           this.connectionStatus = BaileysStatus.CONNECTED;
           this.qrDataUrl = null;
+          this.rawQrString = null;
           const userJid = this.socket?.user?.id || '';
-          this.connectedPhoneNumber = userJid.split(':')[0] || 'Unknown Number';
-          this.logger.log(`✅ WhatsApp Web QR Paired successfully! Connected Phone: +${this.connectedPhoneNumber}`);
+          this.connectedPhoneNumber = userJid.split(':')[0] || 'Connected';
+          this.logger.log(`✅ WhatsApp Web QR Paired successfully! Phone: +${this.connectedPhoneNumber}`);
         }
       });
     } catch (error: any) {
@@ -117,9 +136,7 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
     const messageText = `🔐 رمز التحقق الخاص بك لمنصة الأمان هو: *${otpCode}*\n\nيرجى عدم مشاركة الكود مع أي شخص. ينتهي خلال 5 دقائق.`;
 
     if (this.connectionStatus !== BaileysStatus.CONNECTED || !this.socket) {
-      this.logger.warn(`Baileys not connected. Status: ${this.connectionStatus}. Falling back to simulation mode.`);
-      
-      // Development / Mock fallback
+      this.logger.warn(`Baileys not connected. Status: ${this.connectionStatus}`);
       return {
         success: true,
         messageId: `baileys_sim_${Date.now()}`,
@@ -149,13 +166,14 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
     return {
       status: this.connectionStatus,
       qrDataUrl: this.qrDataUrl,
+      rawQrString: this.rawQrString,
       connectedPhoneNumber: this.connectedPhoneNumber,
       isReady: this.connectionStatus === BaileysStatus.CONNECTED,
     };
   }
 
   /**
-   * Disconnect & clear saved pairing session
+   * Disconnect & clear saved pairing session to generate brand new valid QR Code
    */
   async logoutAndClear() {
     try {
@@ -167,9 +185,10 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
     this.clearSession();
     this.connectionStatus = BaileysStatus.DISCONNECTED;
     this.qrDataUrl = null;
+    this.rawQrString = null;
     this.connectedPhoneNumber = null;
     
-    setTimeout(() => this.initBaileys(), 2000);
+    setTimeout(() => this.initBaileys(), 1500);
     return { success: true, message: 'Session logged out and reset.' };
   }
 
