@@ -4,7 +4,7 @@ import {
   TableContainer, TableHead, TableRow, Chip, Dialog, DialogTitle, 
   DialogContent, DialogActions, TextField, MenuItem, Select, FormControl, InputLabel, Grid, Switch, FormControlLabel 
 } from '@mui/material';
-import { ShieldAlert, Plus, Trash2, Lock, ShieldCheck, Zap, AlertTriangle, Eye } from 'lucide-react';
+import { ShieldAlert, Plus, Trash2, Lock, ShieldCheck, Zap, Inbox } from 'lucide-react';
 import { api } from '../services/api';
 import { useTranslation } from 'react-i18next';
 
@@ -21,22 +21,12 @@ export const SecurityPage: React.FC = () => {
   const [ipJailEnabled, setIpJailEnabled] = useState(true);
   const [encryptionStatus, setEncryptionStatus] = useState(true);
 
-  const defaultRules = [
-    { id: 'sec-1', type: 'BLACKLIST', value: '185.220.101.5', reason: 'محاولة هجوم Brute-force متكرر على الـ OTP', createdAt: new Date(Date.now() - 86400000).toISOString() },
-    { id: 'sec-2', type: 'BLACKLIST', value: '+447911123456', reason: 'رقم هاتف مزيف عالي المخاطر (Spam / Bot)', createdAt: new Date(Date.now() - 172800000).toISOString() },
-    { id: 'sec-3', type: 'WHITELIST', value: '192.168.1.0/24', reason: 'شبكة خوادم الشركة الداخلية الموثوقة', createdAt: new Date(Date.now() - 345600000).toISOString() },
-  ];
-
   const fetchRules = async () => {
     try {
       const res = await api.get('/admin/security/rules');
-      if (res.data && res.data.length > 0) {
-        setRules(res.data);
-      } else {
-        setRules(defaultRules);
-      }
+      setRules(res.data || []);
     } catch (err) {
-      setRules(defaultRules);
+      console.warn('Security rules fetch notice:', err);
     }
   };
 
@@ -52,7 +42,6 @@ export const SecurityPage: React.FC = () => {
       setReason('');
       fetchRules();
     } catch (err: any) {
-      // Fallback local update
       const newRule = { id: `rule-${Date.now()}`, type, value, reason, createdAt: new Date().toISOString() };
       setRules([newRule, ...rules]);
       setOpenModal(false);
@@ -76,10 +65,10 @@ export const SecurityPage: React.FC = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 800, background: 'linear-gradient(90deg, #f8fafc 0%, #2dd4bf 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            مركز حماية وأمان المنصة (Cyber Security Hub)
+            مركز حماية وأمان المنصة الخاصة بك
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            قواعد حظر العناوين IP المشبوهة، منع التكهن بالرموز (Brute-Force Protection)، وتشفير البيانات AES-256
+            قواعد حظر العناوين IP والأرقام المشبوهة لمنع هجمات الـ Brute-Force وتشفير البيانات AES-256
           </Typography>
         </Box>
 
@@ -100,12 +89,12 @@ export const SecurityPage: React.FC = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <Lock size={22} color="#2dd4bf" />
-                <Typography variant="h6" sx={{ fontWeight: 800 }}>التشفير الذاتي AES-256</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 800 }}>تشفير البيانات AES-256</Typography>
               </Box>
               <Chip label="نشط ومؤمّن" color="success" size="small" sx={{ fontWeight: 800 }} />
             </Box>
             <Typography variant="body2" color="text.secondary">
-              تشفير مفاتيح الـ API ورموز الـ OTP المستقلة في قاعدة البيانات قبل الحفظ لحمايتها من التسريب.
+              تشفير مفاتيح الـ API ورموز الـ OTP المستقلة في قاعدة البيانات قبل الحفظ لحمايتها.
             </Typography>
             <FormControlLabel
               control={<Switch checked={encryptionStatus} onChange={(e) => setEncryptionStatus(e.target.checked)} color="primary" />}
@@ -124,7 +113,7 @@ export const SecurityPage: React.FC = () => {
               <Chip label="5 طلبات / دقيقة" color="info" size="small" sx={{ fontWeight: 800 }} />
             </Box>
             <Typography variant="body2" color="text.secondary">
-              تحديد أقصى عدد لرموز OTP التي يمكن إرسالها لنفس رقم الهاتف في الدقيقة لمنع هجمات الاستنزاف.
+              تحديد أقصى عدد لرموز OTP التي يمكن إرسالها لنفس رقم الهاتف لمنع الاستنزاف.
             </Typography>
             <FormControlLabel
               control={<Switch checked={rateLimitEnabled} onChange={(e) => setRateLimitEnabled(e.target.checked)} color="primary" />}
@@ -138,7 +127,7 @@ export const SecurityPage: React.FC = () => {
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                 <ShieldAlert size={22} color="#fb7185" />
-                <Typography variant="h6" sx={{ fontWeight: 800 }}>السجن الفوري للـ IP (IP Jail)</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 800 }}>الحظر التلقائي (IP Lockout)</Typography>
               </Box>
               <Chip label="حظر تلقائي" color="error" size="small" sx={{ fontWeight: 800 }} />
             </Box>
@@ -156,7 +145,7 @@ export const SecurityPage: React.FC = () => {
       {/* Rules Table */}
       <Paper sx={{ p: 3.5, borderRadius: 4 }}>
         <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
-          جدول قواعد الحظر والسماح (Security Rules Registry)
+          جدول قواعد الحظر والسماح الخاصة بك
         </Typography>
 
         <TableContainer>
@@ -171,26 +160,42 @@ export const SecurityPage: React.FC = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {rules.map((rule) => (
-                <TableRow key={rule.id} hover>
-                  <TableCell>
-                    <Chip 
-                      label={rule.type === 'BLACKLIST' ? 'حظر (BLACKLIST)' : 'سماح (WHITELIST)'} 
-                      color={rule.type === 'BLACKLIST' ? 'error' : 'success'} 
-                      size="small"
-                      sx={{ fontWeight: 800, borderRadius: 2 }}
-                    />
-                  </TableCell>
-                  <TableCell sx={{ fontWeight: 800, fontFamily: 'monospace', color: '#38bdf8' }}>{rule.value}</TableCell>
-                  <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>{rule.reason || 'محدد من المسؤول'}</TableCell>
-                  <TableCell sx={{ fontSize: '0.85rem' }}>{new Date(rule.createdAt).toLocaleDateString('ar-SA')}</TableCell>
-                  <TableCell>
-                    <Button color="error" size="small" onClick={() => handleDeleteRule(rule.id)} startIcon={<Trash2 size={16} />} sx={{ fontWeight: 700 }}>
-                      حذف القاعدة
-                    </Button>
+              {rules.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 5 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+                      <Inbox size={38} color="#64748b" />
+                      <Typography variant="body1" sx={{ fontWeight: 700, color: '#94a3b8' }}>
+                        لا توجد قواعد حظر أو سماح مسجلة حالياً.
+                      </Typography>
+                      <Button variant="contained" color="error" size="small" onClick={() => setOpenModal(true)} startIcon={<Plus size={16} />} sx={{ borderRadius: 2.5, fontWeight: 800, mt: 0.5 }}>
+                        إضافة قاعدة حظر جديدة
+                      </Button>
+                    </Box>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                rules.map((rule) => (
+                  <TableRow key={rule.id} hover>
+                    <TableCell>
+                      <Chip 
+                        label={rule.type === 'BLACKLIST' ? 'حظر (BLACKLIST)' : 'سماح (WHITELIST)'} 
+                        color={rule.type === 'BLACKLIST' ? 'error' : 'success'} 
+                        size="small"
+                        sx={{ fontWeight: 800, borderRadius: 2 }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 800, fontFamily: 'monospace', color: '#38bdf8' }}>{rule.value}</TableCell>
+                    <TableCell sx={{ color: 'text.secondary', fontWeight: 600 }}>{rule.reason || 'محدد بواسطة المسؤول'}</TableCell>
+                    <TableCell sx={{ fontSize: '0.85rem' }}>{new Date(rule.createdAt).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>
+                      <Button color="error" size="small" onClick={() => handleDeleteRule(rule.id)} startIcon={<Trash2 size={16} />} sx={{ fontWeight: 700 }}>
+                        حذف القاعدة
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -210,7 +215,7 @@ export const SecurityPage: React.FC = () => {
 
           <TextField 
             fullWidth 
-            label="عنوان IP أو CIDR أو رقم هاتف (+966...)" 
+            label="عنوان IP أو رقم هاتف لحظره" 
             value={value} 
             onChange={(e) => setValue(e.target.value)} 
           />
@@ -227,7 +232,7 @@ export const SecurityPage: React.FC = () => {
         <DialogActions sx={{ p: 2.5 }}>
           <Button onClick={() => setOpenModal(false)} sx={{ fontWeight: 700 }}>إلغاء</Button>
           <Button variant="contained" color="error" onClick={handleCreateRule} disabled={!value} sx={{ fontWeight: 800, borderRadius: 2.5 }}>
-            حفظ القاعدة الأحادية
+            حفظ القاعدة
           </Button>
         </DialogActions>
       </Dialog>

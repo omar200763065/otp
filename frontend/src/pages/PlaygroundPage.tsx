@@ -6,8 +6,8 @@ import { Send, CheckCircle2, RefreshCw, KeyRound, PhoneCall, Code, Terminal, Cop
 import { api } from '../services/api';
 
 export const PlaygroundPage: React.FC = () => {
-  const [phoneNumber, setPhoneNumber] = useState('+966501234567');
-  const [apiKey, setApiKey] = useState('otp_live_key_production_99887766');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [apiKey, setApiKey] = useState('otp_live_key_production');
   const [code, setCode] = useState('');
   
   const [step, setStep] = useState<'SEND' | 'VERIFY'>('SEND');
@@ -22,6 +22,7 @@ export const PlaygroundPage: React.FC = () => {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!phoneNumber) return;
     setLoading(true);
     setResultMessage(null);
     const start = Date.now();
@@ -93,14 +94,14 @@ export const PlaygroundPage: React.FC = () => {
   -H "Content-Type: application/json" \\
   -H "x-api-key: ${apiKey}" \\
   -d '{
-    "phoneNumber": "${phoneNumber}",
+    "phoneNumber": "${phoneNumber || '+9665XXXXXXXX'}",
     "channel": "WHATSAPP"
   }'`;
 
   const generateNode = () => `const axios = require('axios');
 
 const response = await axios.post('https://your-domain.com/api/v1/otp/send', {
-  phoneNumber: '${phoneNumber}',
+  phoneNumber: '${phoneNumber || '+9665XXXXXXXX'}',
   channel: 'WHATSAPP'
 }, {
   headers: { 'x-api-key': '${apiKey}' }
@@ -116,7 +117,7 @@ headers = {
     "Content-Type": "application/json"
 }
 payload = {
-    "phoneNumber": "${phoneNumber}",
+    "phoneNumber": "${phoneNumber || '+9665XXXXXXXX'}",
     "channel": "WHATSAPP"
 }
 
@@ -133,7 +134,7 @@ final response = await http.post(
     'x-api-key': '${apiKey}',
   },
   body: jsonEncode({
-    'phoneNumber': '${phoneNumber}',
+    'phoneNumber': '${phoneNumber || '+9665XXXXXXXX'}',
     'channel': 'WHATSAPP',
   }),
 );
@@ -165,7 +166,7 @@ print(response.body);`;
             مختبر الـ API التفاعلي (Live Developer Playground)
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            اختبار فوري لاستدعاءات الـ API توليد الأكواد لجميع لغات البرمجة وحزم SDK
+            اختبار فوري لاستدعاءات الـ API وتوليد الأكواد لجميع لغات البرمجة
           </Typography>
         </Box>
 
@@ -184,7 +185,7 @@ print(response.body);`;
           <Paper sx={{ p: 3.5, borderRadius: 4, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             <Typography variant="h6" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
               <PhoneCall color="#2dd4bf" size={22} />
-              واجهة اختبار الإرسال والتحقق المباشرة
+              اختبار الإرسال المباشر لرقمك الخاص
             </Typography>
 
             {resultMessage && (
@@ -207,22 +208,22 @@ print(response.body);`;
                   InputProps={{
                     startAdornment: <KeyRound size={18} color="#94a3b8" style={{ marginLeft: 8 }} />,
                   }}
-                  helperText="تم استخدام مفتاح التجربة الافتراضي"
                 />
 
                 <TextField
                   fullWidth
-                  label="رقم الهاتف المستلم (بالصيغة الدولية E.164)"
+                  label="رقم هاتفك المستلم (بالصيغة الدولية E.164)"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  helperText="مثال: +966501234567"
+                  placeholder="أدخل رقمك الخاص هنا"
+                  required
                 />
 
                 <Button
                   type="submit"
                   variant="contained"
                   size="large"
-                  disabled={loading}
+                  disabled={loading || !phoneNumber}
                   startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Send size={18} />}
                   sx={{ 
                     mt: 1, 
@@ -233,7 +234,7 @@ print(response.body);`;
                     fontSize: '1rem'
                   }}
                 >
-                  {loading ? 'جاري الإرسال والمعالجة...' : 'إرسال رمز OTP الفوري'}
+                  {loading ? 'جاري الإرسال للمعالجة...' : 'إرسال رمز OTP الفوري'}
                 </Button>
               </Box>
             ) : (
@@ -247,11 +248,11 @@ print(response.body);`;
 
                 <TextField
                   fullWidth
-                  label="رمز الـ OTP المكون من 6 أرقام"
+                  label="رمز الـ OTP المستلم على هاتفك"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
                   inputProps={{ maxLength: 6 }}
-                  placeholder="849201"
+                  placeholder="أدخل الكود المستلم"
                   autoFocus
                 />
 
@@ -343,7 +344,7 @@ print(response.body);`;
               >
                 {apiResponseJson 
                   ? JSON.stringify(apiResponseJson, null, 2) 
-                  : `{\n  "status": "ready",\n  "message": "// قم باختبار الإرسال لتشاهد استجابة الـ API المباشرة هنا..."\n}`}
+                  : `{\n  "status": "ready",\n  "message": "// أدخل رقم هاتفك واضغط إرسال لتشاهد استجابة الـ API المباشرة هنا..."\n}`}
               </Typography>
             </Paper>
           </Paper>
