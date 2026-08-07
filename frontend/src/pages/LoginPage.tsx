@@ -3,7 +3,7 @@ import {
   Box, Paper, Typography, TextField, Button, Alert, CircularProgress, 
   InputAdornment, IconButton, Chip 
 } from '@mui/material';
-import { ShieldCheck, Lock, Mail, Eye, EyeOff, Zap, KeyRound, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, Eye, EyeOff, Zap, KeyRound, ShieldAlert, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,21 +11,26 @@ export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('admin@otpsaas.com');
   const [password, setPassword] = useState('AdminPassword123!');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setErrorDetails(null);
     setLoading(true);
 
     try {
       await login(email, password);
       navigate('/', { replace: true });
     } catch (err: any) {
-      setError(err.response?.data?.message || 'فشل تسجيل الدخول. يرجى التأكد من البيانات.');
+      console.error('Login Error:', err);
+      const detail = err.response?.data?.message 
+        || (err.response?.status ? `خطأ الاستجابة HTTP Status [${err.response.status}]: ${err.message}` : null)
+        || err.message 
+        || 'تعذر الاتصال بالسيرفر. يرجى التأكد من تشغيل الباك إند.';
+      setErrorDetails(detail);
     } finally {
       setLoading(false);
     }
@@ -33,11 +38,12 @@ export const LoginPage: React.FC = () => {
 
   const handleQuickDemoLogin = async () => {
     setLoading(true);
+    setErrorDetails(null);
     try {
       await login('admin@otpsaas.com', 'AdminPassword123!');
       navigate('/', { replace: true });
     } catch (err: any) {
-      setError('فشل الدخول التلقائي.');
+      setErrorDetails(err?.message || 'خطأ في الدخول التلقائي.');
     } finally {
       setLoading(false);
     }
@@ -64,7 +70,7 @@ export const LoginPage: React.FC = () => {
         }
       }}
     >
-      {/* Decorative Cyber Lighting */}
+      {/* Decorative Lighting Orbs */}
       <Box sx={{ position: 'absolute', width: 400, height: 400, borderRadius: '50%', background: 'rgba(13, 148, 136, 0.18)', filter: 'blur(100px)', top: '-15%', right: '10%' }} />
       <Box sx={{ position: 'absolute', width: 350, height: 350, borderRadius: '50%', background: 'rgba(6, 182, 212, 0.14)', filter: 'blur(90px)', bottom: '-15%', left: '10%' }} />
 
@@ -86,7 +92,7 @@ export const LoginPage: React.FC = () => {
           zIndex: 1,
         }}
       >
-        {/* Shield Icon */}
+        {/* Header Icon */}
         <Box 
           sx={{ 
             width: 68, 
@@ -108,7 +114,7 @@ export const LoginPage: React.FC = () => {
           تسجيل الدخول - منصة OTP SaaS
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5, textAlign: 'center', lineHeight: 1.6 }}>
-          لوحة تحكّم الجيل الجديد المستقلة للتحقق بخطوتين عبر الواتساب والـ API
+          لوحة تحكّم الجيل الجديد للتحقق بخطوتين وتأمين الـ API
         </Typography>
 
         <Chip 
@@ -125,9 +131,26 @@ export const LoginPage: React.FC = () => {
           }} 
         />
 
-        {error && (
-          <Alert severity="error" sx={{ width: '100%', mb: 3, borderRadius: 3, backgroundColor: 'rgba(244, 63, 94, 0.15)', border: '1px solid rgba(244, 63, 94, 0.3)', color: '#fecdd3' }}>
-            {error}
+        {/* Detailed Error Printing Alert */}
+        {errorDetails && (
+          <Alert 
+            severity="error" 
+            icon={<AlertTriangle size={20} color="#fb7185" />}
+            sx={{ 
+              width: '100%', 
+              mb: 3, 
+              borderRadius: 3, 
+              backgroundColor: 'rgba(244, 63, 94, 0.15)', 
+              border: '1px solid rgba(244, 63, 94, 0.3)', 
+              color: '#fecdd3',
+              fontFamily: 'monospace',
+              fontSize: '0.85rem'
+            }}
+          >
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#f87171', mb: 0.5 }}>
+              تفاصيل المشكلة والخطأ (Error Trace):
+            </Typography>
+            {errorDetails}
           </Alert>
         )}
 
@@ -197,7 +220,7 @@ export const LoginPage: React.FC = () => {
               }
             }}
           >
-            {loading ? 'جاري التحقق والدخول...' : 'دخول لوحة التحكم الحالية'}
+            {loading ? 'جاري التحقق والدخول...' : 'دخول لوحة التحكم'}
           </Button>
         </Box>
 

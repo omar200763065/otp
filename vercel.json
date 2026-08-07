@@ -19,10 +19,6 @@
       "dest": "/api/index.ts"
     },
     {
-      "src": "/admin/(.*)",
-      "dest": "/api/index.ts"
-    },
-    {
       "handle": "filesystem"
     },
     {

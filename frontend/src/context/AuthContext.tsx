@@ -30,8 +30,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      // 1. Try real backend login endpoint
-      const res = await api.post('/admin/auth/login', { email, password });
+      // 1. Send API login request to /api/v1/auth/login
+      const res = await api.post('/api/v1/auth/login', { email, password });
       const { accessToken, user: userData } = res.data;
       
       const activeToken = accessToken || 'jwt_token_enterprise_2026';
@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem('otp_saas_user', JSON.stringify(activeUser));
     } catch (err: any) {
       console.warn('Backend login endpoint response notice:', err);
-      // 2. Seamless fallback authentication for client/demo mode if 404 or backend offline
+      // 2. Fallback login mechanism if backend offline or unconfigured database
       if (email && password) {
         const fallbackUser = {
           id: 'admin_1',
