@@ -22,3 +22,5 @@ backend/baileys_auth_info/
 *.log
 npm-debug.log*
 .DS_Store
+*.db
+backend/prisma/*.db
