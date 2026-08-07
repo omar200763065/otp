@@ -59,12 +59,17 @@ export default async (req: any, res: any) => {
   try {
     await bootstrapServer();
 
+    // Extract original request path from Vercel headers or req.url
     let rawPath =
       req.headers['x-matched-path'] ||
       req.headers['x-original-url'] ||
       req.headers['x-forwarded-url'] ||
       req.url ||
       '/';
+
+    if (rawPath.includes('[...path]')) {
+      rawPath = req.headers['x-original-url'] || req.url || '/';
+    }
 
     req.url = rawPath;
     req.originalUrl = rawPath;

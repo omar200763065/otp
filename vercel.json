@@ -3,19 +3,15 @@
   "outputDirectory": "frontend/dist",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.ts"
-    },
-    {
       "source": "/admin/(.*)",
-      "destination": "/api/index.ts"
+      "destination": "/api/admin/$1"
     },
     {
       "source": "/otp/(.*)",
-      "destination": "/api/index.ts"
+      "destination": "/api/otp/$1"
     },
     {
-      "source": "/((?!api/|admin/|otp/|assets/|favicon.ico).*)",
+      "source": "/((?!api/|assets/|favicon.ico).*)",
       "destination": "/index.html"
     }
   ]
