@@ -269,28 +269,48 @@ export const WhatsAppPage: React.FC = () => {
                     </Box>
                   </Box>
 
-                  {/* Secondary: QR Code Scanning Note */}
-                  <Alert severity="warning" sx={{ borderRadius: 3, fontWeight: 700, maxWidth: 520, textAlign: 'right', mt: 1 }}>
-                    تنويه بشأن كاميرا الواتساب: لتفعيل ربط كاميرا QR Code المباشرة، يلزم وجود سيرفر Node.js ثابت ومستمر بالخلفية، أو استخدام Meta Cloud API الرسمي.
-                  </Alert>
+                  {/* QR Code Container */}
+                  <Paper sx={{ p: 3, borderRadius: 4, bgcolor: 'rgba(15, 23, 42, 0.6)', border: '2px dashed rgba(45, 212, 191, 0.5)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', maxWidth: 520 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: '#2dd4bf' }}>
+                      رمز QR Code المباشر لمسح كاميرا الواتساب
+                    </Typography>
+                    
+                    {baileys.qrDataUrl ? (
+                      <Box 
+                        sx={{ 
+                          p: 2.5, 
+                          borderRadius: 4, 
+                          bgcolor: '#ffffff', 
+                          boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+                          border: '4px solid #0d9488'
+                        }}
+                      >
+                        <img 
+                          src={baileys.qrDataUrl} 
+                          alt="WhatsApp Web Pairing QR Code" 
+                          style={{ width: 240, height: 240, display: 'block' }} 
+                        />
+                      </Box>
+                    ) : (
+                      <Box sx={{ py: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1.5 }}>
+                        <CircularProgress size={36} sx={{ color: '#2dd4bf' }} />
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
+                          جاري استلام رمز الـ QR المباشر من السيرفر...
+                        </Typography>
+                      </Box>
+                    )}
 
-                  {baileys.qrDataUrl && (
-                    <Box 
-                      sx={{ 
-                        p: 2, 
-                        borderRadius: 4, 
-                        bgcolor: '#ffffff', 
-                        border: '2px solid rgba(45, 212, 191, 0.4)',
-                        opacity: 0.85
-                      }}
+                    <Button 
+                      size="small" 
+                      variant="outlined" 
+                      onClick={handleGenerateInstantQR} 
+                      disabled={loading}
+                      startIcon={<RefreshCw size={14} />} 
+                      sx={{ fontWeight: 800, color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.4)', borderRadius: 2.5 }}
                     >
-                      <img 
-                        src={baileys.qrDataUrl} 
-                        alt="WhatsApp Web Pairing QR Code" 
-                        style={{ width: 180, height: 180, display: 'block' }} 
-                      />
-                    </Box>
-                  )}
+                      تحديث وإعادة توليد كود الـ QR
+                    </Button>
+                  </Paper>
                 </Box>
               )}
             </Paper>
