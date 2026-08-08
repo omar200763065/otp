@@ -162,7 +162,20 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
     const cleanPhone = toPhoneNumber.replace(/[^0-9]/g, '');
     const jid = `${cleanPhone}@s.whatsapp.net`;
 
-    const messageText = `🔐 رمز التحقق الخاص بك لمنصة الأمان هو: *${otpCode}*\n\nيرجى عدم مشاركة الكود مع أي شخص. ينتهي خلال 5 دقائق.`;
+    const messageText = 
+`🔒 *رمز التحقق الخاص بك*
+━━━━━━━━━━━━━━━━━━━━━
+
+مرحباً بك! 👋
+رمز تفعيل حسابك الآمن هو:
+
+👉  *${otpCode}*  👈
+
+⏱️ *ملاحظة:* هذا الرمز صالِح لمدة *5 دقائق* فقط.
+⚠️ *تنبيه أمني:* لحماية حسابك، لا تشارك هذا الرمز مع أي شخص إطلاقاً.
+
+━━━━━━━━━━━━━━━━━━━━━
+✨ *نظام التحقق الآمن - OTP SaaS Platform*`;
 
     if (this.connectionStatus !== BaileysStatus.CONNECTED || !this.socket) {
       this.logger.warn(`Baileys not connected. Status: ${this.connectionStatus}`);
