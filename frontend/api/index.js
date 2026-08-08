@@ -40,11 +40,14 @@ export default async (req, res) => {
     return res.status(200).end();
   }
 
-  // Extract path
-  let path = req.headers['x-matched-path'] || req.headers['x-original-url'] || req.url || '/';
+  // Extract path and query params
+  let rawUrl = req.headers['x-matched-path'] || req.headers['x-original-url'] || req.url || '/';
+  let path = rawUrl;
+  let queryParams = {};
   try {
-    const parsed = new URL(path, 'http://localhost');
+    const parsed = new URL(rawUrl, 'http://localhost');
     path = parsed.pathname;
+    parsed.searchParams.forEach((val, key) => { queryParams[key] = val; });
   } catch (e) {}
 
   // Parse Body
@@ -63,6 +66,8 @@ export default async (req, res) => {
     try { body = JSON.parse(body); } catch (e) {}
   }
   body = body || {};
+
+  const inputPhone = body.phoneNumber || body.phone || queryParams.phoneNumber || queryParams.phone || req.query?.phoneNumber || req.query?.phone;
 
   // Route Handlers
   if (path.includes('/dashboard') || path.includes('/overview')) {
@@ -97,9 +102,9 @@ export default async (req, res) => {
       return res.status(200).json({ success: true, message: 'WhatsApp session reset.' });
     }
 
-    if (path.includes('/connect') || (req.method === 'POST' && (body.phoneNumber || body.phone))) {
-      const inputPhone = body.phoneNumber || body.phone || '+966500000000';
-      const cleanPhone = inputPhone.replace(/[^0-9+]/g, '');
+    if (path.includes('/connect') || (req.method === 'POST' && inputPhone)) {
+      const targetPhone = inputPhone || '+966500000000';
+      const cleanPhone = targetPhone.replace(/[^0-9+]/g, '');
       state.baileys.status = 'CONNECTED';
       state.baileys.connectedPhoneNumber = cleanPhone.startsWith('+') ? cleanPhone : '+' + cleanPhone;
       state.baileys.isReady = true;
