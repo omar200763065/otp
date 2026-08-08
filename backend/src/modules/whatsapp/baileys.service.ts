@@ -203,11 +203,9 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
     }
     
     try {
-      // Clear previous unauthenticated session data for clean pairing handshake
-      if (this.connectionStatus !== BaileysStatus.CONNECTED) {
-        this.clearSession();
+      if (!this.socket) {
         await this.initBaileys();
-        await new Promise(r => setTimeout(r, 1500));
+        await new Promise(r => setTimeout(r, 1000));
       }
 
       if (this.socket && typeof this.socket.requestPairingCode === 'function') {
