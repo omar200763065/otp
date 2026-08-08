@@ -35,6 +35,7 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
   private qrDataUrl: string | null = null;
   private rawQrString: string | null = null;
   private connectionStatus: BaileysStatus = BaileysStatus.DISCONNECTED;
+  private connectedPhoneNumber: string | null = null;
   private getAuthFolder(): string {
     if (process.env.VERCEL) {
       return path.join('/tmp', 'baileys_auth_info');
