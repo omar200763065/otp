@@ -21,6 +21,12 @@ const state = {
     { id: 'audit-1', userEmail: 'admin@otpsaas.com', action: 'LOGIN_SUCCESS', resource: 'AdminDashboard', ipAddress: '127.0.0.1', createdAt: new Date().toISOString() },
     { id: 'audit-2', userEmail: 'admin@otpsaas.com', action: 'CREATE_API_KEY', resource: 'ApiKey:otp_live_a8f92k', ipAddress: '127.0.0.1', createdAt: new Date().toISOString() },
   ],
+  baileys: {
+    status: 'PAIRING_REQUIRED',
+    connectedPhoneNumber: null,
+    isReady: false,
+    qrDataUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=2%40whatsapp_pairing_session_' + Date.now(),
+  },
   providerMode: 'BAILEYS_QR',
 };
 
@@ -58,7 +64,7 @@ export default async (req, res) => {
       activeApps: state.apps.length,
       activeApiKeys: state.apiKeys.length,
       systemHealth: 'OPERATIONAL',
-      whatsappStatus: 'CONNECTED',
+      whatsappStatus: state.baileys.status === 'CONNECTED' ? 'CONNECTED' : 'DISCONNECTED',
       providerMode: state.providerMode,
       analyticsData: [
         { timestamp: '00:00', sent: 420, verified: 418 },
@@ -73,17 +79,31 @@ export default async (req, res) => {
   }
 
   if (path.includes('/whatsapp')) {
+    if (path.includes('/disconnect')) {
+      state.baileys.status = 'PAIRING_REQUIRED';
+      state.baileys.connectedPhoneNumber = null;
+      state.baileys.isReady = false;
+      state.baileys.qrDataUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=2%40whatsapp_pairing_session_' + Date.now();
+      return res.status(200).json({ success: true, message: 'WhatsApp session reset.' });
+    }
+
+    if (path.includes('/connect') || (req.method === 'POST' && (body.phoneNumber || body.phone))) {
+      const inputPhone = body.phoneNumber || body.phone || '+966500000000';
+      const cleanPhone = inputPhone.replace(/[^0-9+]/g, '');
+      state.baileys.status = 'CONNECTED';
+      state.baileys.connectedPhoneNumber = cleanPhone.startsWith('+') ? cleanPhone : '+' + cleanPhone;
+      state.baileys.isReady = true;
+      state.baileys.qrDataUrl = null;
+      return res.status(200).json({ success: true, connectedPhoneNumber: state.baileys.connectedPhoneNumber });
+    }
+
     if (req.method === 'POST' && body.mode) {
       state.providerMode = body.mode;
     }
+
     return res.status(200).json({
       providerMode: state.providerMode,
-      baileys: {
-        status: 'CONNECTED',
-        connectedPhoneNumber: '+966500000000',
-        isReady: true,
-        qrDataUrl: null,
-      },
+      baileys: state.baileys,
     });
   }
 

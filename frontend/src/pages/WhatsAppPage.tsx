@@ -25,6 +25,24 @@ export const WhatsAppPage: React.FC = () => {
   const [sendingTest, setSendingTest] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
 
+  // Custom Phone Pairing State
+  const [customPhoneInput, setCustomPhoneInput] = useState('');
+
+  const handleConnectCustomPhone = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!customPhoneInput) return;
+    setLoading(true);
+    try {
+      await api.post('/api/admin/whatsapp/connect', { phoneNumber: customPhoneInput });
+      setCustomPhoneInput('');
+      await fetchStatus();
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchStatus = async () => {
     try {
       const res = await api.get('/api/admin/whatsapp/status');
@@ -176,9 +194,9 @@ export const WhatsAppPage: React.FC = () => {
                   </Typography>
                   <Chip 
                     icon={<Smartphone size={18} color="#2dd4bf" />} 
-                    label={`الرقم المربوط بالمحرك: +${baileys.connectedPhoneNumber}`} 
+                    label={`الرقم المربوط بالمحرك: ${baileys.connectedPhoneNumber.startsWith('+') ? baileys.connectedPhoneNumber : '+' + baileys.connectedPhoneNumber}`} 
                     variant="outlined"
-                    sx={{ fontWeight: 800, fontSize: '1rem', py: 2.2, px: 1.5, borderRadius: 3.5, borderColor: 'rgba(45, 212, 191, 0.4)', color: '#2dd4bf' }}
+                    sx={{ fontWeight: 800, fontSize: '1.05rem', py: 2.2, px: 2, borderRadius: 3.5, borderColor: 'rgba(45, 212, 191, 0.4)', color: '#2dd4bf' }}
                   />
                   <Button 
                     variant="outlined" 
@@ -187,12 +205,12 @@ export const WhatsAppPage: React.FC = () => {
                     onClick={handleDisconnect}
                     sx={{ mt: 1, borderRadius: 3, fontWeight: 700 }}
                   >
-                    فصل الرقم ومسح كود جديد
+                    فصل الرقم الحالي وتغييره لرقمك الخاص
                   </Button>
                 </Box>
               ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%' }}>
-                  <Alert severity="info" sx={{ borderRadius: 3, fontWeight: 700, maxWidth: 480, textAlign: 'right' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5, width: '100%' }}>
+                  <Alert severity="info" sx={{ borderRadius: 3, fontWeight: 700, maxWidth: 500, textAlign: 'right' }}>
                     افتح تطبيق الواتساب على هاتفك &gt; الأجهزة المرتبطة &gt; ربط جهاز &gt; وجه الكاميرا للرمز أدناه:
                   </Alert>
 
@@ -251,8 +269,57 @@ export const WhatsAppPage: React.FC = () => {
                       startIcon={<RefreshCw size={14} />} 
                       sx={{ fontWeight: 800, color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.4)', borderRadius: 2.5 }}
                     >
-                      تجديد وإعادة توليد كود الـ QR
+                      تجديد كود الـ QR
                     </Button>
+                  </Box>
+
+                  {/* Direct Phone Number Pairing Form */}
+                  <Box 
+                    component="form" 
+                    onSubmit={handleConnectCustomPhone} 
+                    sx={{ 
+                      mt: 1, 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      gap: 1.5, 
+                      width: '100%', 
+                      maxWidth: 500, 
+                      p: 2.5, 
+                      borderRadius: 3.5, 
+                      bgcolor: 'rgba(15, 23, 42, 0.5)', 
+                      border: '1px solid rgba(45, 212, 191, 0.25)' 
+                    }}
+                  >
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#2dd4bf', textAlign: 'right' }}>
+                      أو أدخل رقم هاتف الواتساب الخاص بك لربطه بالمحرك مباشرة:
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+                      <TextField
+                        fullWidth
+                        size="small"
+                        label="أدخل رقمك الخاص (بالصيغة الدولية)"
+                        value={customPhoneInput}
+                        onChange={(e) => setCustomPhoneInput(e.target.value)}
+                        placeholder="+9665XXXXXXXX"
+                        sx={{ flex: 1, minWidth: 200 }}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Smartphone size={18} color="#2dd4bf" />
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                      <Button 
+                        type="submit" 
+                        variant="contained" 
+                        color="primary"
+                        disabled={loading || !customPhoneInput}
+                        sx={{ fontWeight: 800, whiteSpace: 'nowrap', borderRadius: 2.5, px: 3, background: 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)' }}
+                      >
+                        ربط رقمي الآن
+                      </Button>
+                    </Box>
                   </Box>
                 </Box>
               )}
