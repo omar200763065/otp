@@ -35,15 +35,48 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
   private qrDataUrl: string | null = null;
   private rawQrString: string | null = null;
   private connectionStatus: BaileysStatus = BaileysStatus.DISCONNECTED;
-  private connectedPhoneNumber: string | null = null;
   private getAuthFolder(): string {
-    if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    if (process.env.VERCEL) {
       return path.join('/tmp', 'baileys_auth_info');
     }
-    return path.join(process.cwd(), 'baileys_auth_info');
+    const candidateRoot = path.join(__dirname, '..', '..', '..');
+    const folder = path.join(candidateRoot, 'baileys_auth_info');
+    if (!fs.existsSync(folder)) {
+      try { fs.mkdirSync(folder, { recursive: true }); } catch {}
+    }
+    return folder;
+  }
+
+  private getSessionMetaFile(): string {
+    return path.join(this.getAuthFolder(), 'session_meta.json');
+  }
+
+  private saveSessionMeta(phoneNumber: string) {
+    try {
+      const file = this.getSessionMetaFile();
+      fs.writeFileSync(file, JSON.stringify({
+        phoneNumber,
+        connectedAt: new Date().toISOString(),
+        status: BaileysStatus.CONNECTED
+      }), 'utf-8');
+    } catch {}
+  }
+
+  private loadSessionMeta() {
+    try {
+      const file = this.getSessionMetaFile();
+      if (fs.existsSync(file)) {
+        const data = JSON.parse(fs.readFileSync(file, 'utf-8'));
+        if (data.phoneNumber) {
+          this.connectedPhoneNumber = data.phoneNumber;
+          this.connectionStatus = BaileysStatus.CONNECTED;
+        }
+      }
+    } catch {}
   }
 
   async onModuleInit() {
+    this.loadSessionMeta();
     if (process.env.ENABLE_BAILEYS !== 'false' && !process.env.VERCEL) {
       this.initBaileys().catch((err) => {
         this.logger.warn(`Baileys initialization postponed: ${err.message}`);
@@ -146,6 +179,7 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
           this.rawQrString = null;
           const userJid = this.socket?.user?.id || '';
           this.connectedPhoneNumber = userJid.split(':')[0] || 'Connected';
+          this.saveSessionMeta(this.connectedPhoneNumber);
           this.logger.log(`✅ WhatsApp Web QR Paired successfully! Phone: +${this.connectedPhoneNumber}`);
         }
       });
