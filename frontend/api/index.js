@@ -24,7 +24,7 @@ const state = {
   providerMode: 'BAILEYS_QR',
 };
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // CORS Headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS');
