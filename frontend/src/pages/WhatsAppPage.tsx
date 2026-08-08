@@ -26,6 +26,7 @@ export const WhatsAppPage: React.FC = () => {
   const [testResult, setTestResult] = useState<string | null>(null);
 
   // Custom Phone Pairing State
+  const [customPhoneInput, setCustomPhoneInput] = useState('');
   const [pairingCodeResult, setPairingCodeResult] = useState<string | null>(null);
   const [pairingError, setPairingError] = useState<string | null>(null);
 
