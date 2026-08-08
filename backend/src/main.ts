@@ -2,6 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
+import * as express from 'express';
+import * as path from 'path';
+import * as fs from 'fs';
 import { AppModule } from './app.module';
 import { SanitizationInterceptor } from './common/interceptors/sanitization.interceptor';
 
@@ -57,9 +60,23 @@ async function bootstrap() {
   });
 
   const port = process.env.PORT || 3000;
+
+  // 6. Serve React Frontend UI if dist directory exists
+  const distPath = path.join(__dirname, '..', '..', 'frontend', 'dist');
+  if (fs.existsSync(distPath)) {
+    app.use(express.static(distPath));
+    app.use((req: any, res: any, next: any) => {
+      if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/admin') && !req.path.startsWith('/otp')) {
+        return res.sendFile(path.join(distPath, 'index.html'));
+      }
+      next();
+    });
+  }
+
   await app.listen(port);
 
   logger.log(`🚀 OTP SaaS Backend Server running on port ${port}`);
+  logger.log(`🖥️ React Frontend Application available at http://localhost:${port}/`);
   logger.log(`📚 OpenAPI Swagger Documentation available at http://localhost:${port}/api/docs`);
 }
 
