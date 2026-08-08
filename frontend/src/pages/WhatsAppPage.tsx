@@ -106,10 +106,14 @@ export const WhatsAppPage: React.FC = () => {
     setSendingTest(true);
     setTestResult(null);
     try {
-      await new Promise(res => setTimeout(res, 1200));
-      setTestResult(`تم إرسال رمز OTP (${testCode}) بنجاح إلى الرقم ${testPhone} عبر محرك الواتساب.`);
+      const res = await api.post('/api/v1/send-otp', { 
+        phoneNumber: testPhone, 
+        code: testCode,
+        channel: 'WHATSAPP' 
+      });
+      setTestResult(res.data?.message || `تم إرسال رمز OTP (${testCode}) بنجاح إلى الرقم ${testPhone} عبر محرك الواتساب (${providerMode === 'BAILEYS_QR' ? 'WhatsApp Web Gateway' : 'Meta Cloud API'}).`);
     } catch (err: any) {
-      setTestResult('حدث خطأ في الإرسال. تأكد من صحة رقم الهاتف والمحرك.');
+      setTestResult('حدث خطأ في الإرسال. تأكد من كتابة الرقم بالصيغة الدولية.');
     } finally {
       setSendingTest(false);
     }
