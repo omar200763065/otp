@@ -62,12 +62,18 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
 
   // 6. Serve React Frontend UI if dist directory exists
-  const distPath = path.join(__dirname, '..', '..', 'frontend', 'dist');
-  if (fs.existsSync(distPath)) {
+  const candidatePaths = [
+    path.join(__dirname, '..', '..', 'frontend', 'dist'),
+    path.join(__dirname, '..', 'frontend', 'dist'),
+    path.join(process.cwd(), 'frontend', 'dist'),
+  ];
+  let distPath = candidatePaths.find(p => fs.existsSync(p));
+
+  if (distPath) {
     app.use(express.static(distPath));
     app.use((req: any, res: any, next: any) => {
       if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.startsWith('/admin') && !req.path.startsWith('/otp')) {
-        return res.sendFile(path.join(distPath, 'index.html'));
+        return res.sendFile(path.join(distPath!, 'index.html'));
       }
       next();
     });
