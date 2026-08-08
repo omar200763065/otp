@@ -26,8 +26,8 @@ export const WhatsAppPage: React.FC = () => {
   const [testResult, setTestResult] = useState<string | null>(null);
 
   // Custom Phone Pairing State
-  const [customPhoneInput, setCustomPhoneInput] = useState('');
   const [pairingCodeResult, setPairingCodeResult] = useState<string | null>(null);
+  const [pairingError, setPairingError] = useState<string | null>(null);
 
   const handleConnectCustomPhone = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -47,14 +47,17 @@ export const WhatsAppPage: React.FC = () => {
   const handleRequestPairingCode = async () => {
     if (!customPhoneInput) return;
     setLoading(true);
+    setPairingError(null);
     try {
       const res = await api.post('/api/admin/whatsapp/pairing-code', { phoneNumber: customPhoneInput });
       if (res.data?.pairingCode) {
         setPairingCodeResult(res.data.pairingCode);
+      } else if (res.data?.error) {
+        setPairingError(res.data.error);
       }
       await fetchStatus();
     } catch (err: any) {
-      console.error('Error generating pairing code:', err);
+      setPairingError('تعذر الحصول على رمز الاقتران. يرجى التأكد من تشغيل السيرفر المحلي http://localhost:3000');
     } finally {
       setLoading(false);
     }
@@ -303,6 +306,12 @@ export const WhatsAppPage: React.FC = () => {
                         </Typography>
                         <br />
                         التعليمات: افتح تطبيق الواتساب بهاتفك &gt; الأجهزة المرتبطة &gt; (الربط باستخدام رقم الهاتف بدلاً من ذلك) &gt; أدخل الرمز أعلاه!
+                      </Alert>
+                    )}
+
+                    {pairingError && (
+                      <Alert severity="warning" sx={{ borderRadius: 3, fontWeight: 800, textAlign: 'right', mt: 1 }}>
+                        {pairingError}
                       </Alert>
                     )}
                   </Box>

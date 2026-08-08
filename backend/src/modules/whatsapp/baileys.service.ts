@@ -197,29 +197,32 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
     if (!phoneNumber) {
       return { success: false, error: 'Phone number is required' };
     }
-    const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
-    
-    if (!this.socket) {
-      await this.initBaileys();
+    let cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+    if (cleanPhone.startsWith('00')) {
+      cleanPhone = cleanPhone.substring(2);
     }
-
+    
     try {
+      // Clear previous unauthenticated session data for clean pairing handshake
+      if (this.connectionStatus !== BaileysStatus.CONNECTED) {
+        this.clearSession();
+        await this.initBaileys();
+        await new Promise(r => setTimeout(r, 1500));
+      }
+
       if (this.socket && typeof this.socket.requestPairingCode === 'function') {
         const code = await this.socket.requestPairingCode(cleanPhone);
         const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
         this.pairingCode = formattedCode;
         this.connectionStatus = BaileysStatus.PAIRING_REQUIRED;
-        this.logger.log(`🔑 Generated 8-character WhatsApp Pairing Code: ${formattedCode}`);
+        this.logger.log(`🔑 Real WhatsApp 8-character Pairing Code generated for +${cleanPhone}: ${formattedCode}`);
         return { success: true, pairingCode: formattedCode };
       } else {
-        const mockCode = `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-        this.pairingCode = mockCode;
-        this.connectionStatus = BaileysStatus.PAIRING_REQUIRED;
-        return { success: true, pairingCode: mockCode };
+        return { success: false, error: 'رمز الاقتران المباشر يتطلب تشغيل السيرفر المحلي على حاسوبك (http://localhost:3000) أو استخدام Meta Cloud API الرسمي.' };
       }
     } catch (error: any) {
       this.logger.error(`Error generating WhatsApp pairing code: ${error.message}`);
-      return { success: false, error: error.message };
+      return { success: false, error: `تعذر استخراج الرمز: ${error.message}` };
     }
   }
 
