@@ -97,7 +97,6 @@ export class BaileysService implements OnModuleInit, OnModuleDestroy {
       this.socket = makeWASocket({
         version: versionTuple,
         auth: state,
-        printQRInTerminal: true,
         browser: Browsers ? Browsers.macOS('Desktop') : ['Mac OS', 'Chrome', '121.0.0'],
         logger: require('pino')({ level: 'silent' }),
         connectTimeoutMs: 60000,
