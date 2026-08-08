@@ -210,98 +210,41 @@ export const WhatsAppPage: React.FC = () => {
                 </Box>
               ) : (
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2.5, width: '100%' }}>
-                  <Alert severity="info" sx={{ borderRadius: 3, fontWeight: 700, maxWidth: 500, textAlign: 'right' }}>
-                    افتح تطبيق الواتساب على هاتفك &gt; الأجهزة المرتبطة &gt; ربط جهاز &gt; وجه الكاميرا للرمز أدناه:
-                  </Alert>
-
-                  {baileys.qrDataUrl ? (
-                    <Box 
-                      sx={{ 
-                        p: 2.5, 
-                        borderRadius: 4, 
-                        bgcolor: '#ffffff', 
-                        boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
-                        border: '4px solid #0d9488',
-                        position: 'relative'
-                      }}
-                    >
-                      <img 
-                        src={baileys.qrDataUrl} 
-                        alt="WhatsApp Web Pairing QR Code" 
-                        style={{ width: 250, height: 250, display: 'block' }} 
-                      />
-                    </Box>
-                  ) : (
-                    <Box 
-                      sx={{ 
-                        width: 280, 
-                        height: 280, 
-                        borderRadius: 4, 
-                        bgcolor: 'rgba(15, 23, 42, 0.6)', 
-                        border: '2px dashed rgba(45, 212, 191, 0.4)', 
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        gap: 2,
-                        p: 3
-                      }}
-                    >
-                      <CircularProgress size={42} sx={{ color: '#2dd4bf' }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 700 }}>
-                        جاري إعداد كود QR جديد وصالح من الواتساب...
-                      </Typography>
-                    </Box>
-                  )}
-
-                  <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <Chip 
-                      icon={<RefreshCw size={14} className={baileys.qrDataUrl ? '' : 'animate-spin'} color="#2dd4bf" />} 
-                      label={baileys.qrDataUrl ? 'كود QR حقيقي ومباشر جاهز للمسح' : 'جاري توليد الكود من الواتساب...'} 
-                      variant="outlined"
-                      sx={{ fontWeight: 800, borderRadius: 3, color: '#2dd4bf', borderColor: 'rgba(45, 212, 191, 0.4)' }}
-                    />
-                    <Button 
-                      size="small" 
-                      variant="outlined" 
-                      onClick={handleGenerateInstantQR} 
-                      disabled={loading}
-                      startIcon={<RefreshCw size={14} />} 
-                      sx={{ fontWeight: 800, color: '#38bdf8', borderColor: 'rgba(56, 189, 248, 0.4)', borderRadius: 2.5 }}
-                    >
-                      تجديد كود الـ QR
-                    </Button>
-                  </Box>
-
-                  {/* Direct Phone Number Pairing Form */}
+                  
+                  {/* Direct Phone Number Pairing Form (PRIMARY) */}
                   <Box 
                     component="form" 
                     onSubmit={handleConnectCustomPhone} 
                     sx={{ 
-                      mt: 1, 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      gap: 1.5, 
                       width: '100%', 
-                      maxWidth: 500, 
-                      p: 2.5, 
-                      borderRadius: 3.5, 
-                      bgcolor: 'rgba(15, 23, 42, 0.5)', 
-                      border: '1px solid rgba(45, 212, 191, 0.25)' 
+                      maxWidth: 520, 
+                      p: 3, 
+                      borderRadius: 4, 
+                      bgcolor: 'rgba(13, 148, 136, 0.12)', 
+                      border: '2px solid #0d9488',
+                      boxShadow: '0 8px 30px rgba(13, 148, 136, 0.25)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2
                     }}
                   >
+                    <Alert severity="success" sx={{ borderRadius: 3, fontWeight: 800, textAlign: 'right' }}>
+                      طريقة الربط الفورية المعتمدة: أدخل رقم هاتفك بالرمز الدولي واضغط (ربط رقمي الآن):
+                    </Alert>
+
                     <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#2dd4bf', textAlign: 'right' }}>
-                      أو أدخل رقم هاتف الواتساب الخاص بك لربطه بالمحرك مباشرة:
+                      أدخل رقم الواتساب الخاص بك:
                     </Typography>
+                    
                     <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
                       <TextField
                         fullWidth
                         size="small"
-                        label="أدخل رقمك الخاص (بالصيغة الدولية)"
+                        label="رقم الهاتف الشخصي (بالرمز الدولي)"
                         value={customPhoneInput}
                         onChange={(e) => setCustomPhoneInput(e.target.value)}
                         placeholder="+9665XXXXXXXX"
-                        sx={{ flex: 1, minWidth: 200 }}
+                        sx={{ flex: 1, minWidth: 220 }}
                         InputProps={{
                           startAdornment: (
                             <InputAdornment position="start">
@@ -315,12 +258,35 @@ export const WhatsAppPage: React.FC = () => {
                         variant="contained" 
                         color="primary"
                         disabled={loading || !customPhoneInput}
-                        sx={{ fontWeight: 800, whiteSpace: 'nowrap', borderRadius: 2.5, px: 3, background: 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)' }}
+                        sx={{ fontWeight: 800, whiteSpace: 'nowrap', borderRadius: 2.5, px: 3.5, background: 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)' }}
                       >
-                        ربط رقمي الآن
+                        ربط وتفعيل رقمي فوراً
                       </Button>
                     </Box>
                   </Box>
+
+                  {/* Secondary: QR Code Scanning Note */}
+                  <Alert severity="warning" sx={{ borderRadius: 3, fontWeight: 700, maxWidth: 520, textAlign: 'right', mt: 1 }}>
+                    تنويه بشأن كاميرا الواتساب: لتفعيل ربط كاميرا QR Code المباشرة، يلزم وجود سيرفر Node.js ثابت ومستمر بالخلفية، أو استخدام Meta Cloud API الرسمي.
+                  </Alert>
+
+                  {baileys.qrDataUrl && (
+                    <Box 
+                      sx={{ 
+                        p: 2, 
+                        borderRadius: 4, 
+                        bgcolor: '#ffffff', 
+                        border: '2px solid rgba(45, 212, 191, 0.4)',
+                        opacity: 0.85
+                      }}
+                    >
+                      <img 
+                        src={baileys.qrDataUrl} 
+                        alt="WhatsApp Web Pairing QR Code" 
+                        style={{ width: 180, height: 180, display: 'block' }} 
+                      />
+                    </Box>
+                  )}
                 </Box>
               )}
             </Paper>
