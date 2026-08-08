@@ -27,6 +27,7 @@ export const WhatsAppPage: React.FC = () => {
 
   // Custom Phone Pairing State
   const [customPhoneInput, setCustomPhoneInput] = useState('');
+  const [pairingCodeResult, setPairingCodeResult] = useState<string | null>(null);
 
   const handleConnectCustomPhone = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -38,6 +39,22 @@ export const WhatsAppPage: React.FC = () => {
       await fetchStatus();
     } catch (err: any) {
       console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRequestPairingCode = async () => {
+    if (!customPhoneInput) return;
+    setLoading(true);
+    try {
+      const res = await api.post('/api/admin/whatsapp/pairing-code', { phoneNumber: customPhoneInput });
+      if (res.data?.pairingCode) {
+        setPairingCodeResult(res.data.pairingCode);
+      }
+      await fetchStatus();
+    } catch (err: any) {
+      console.error('Error generating pairing code:', err);
     } finally {
       setLoading(false);
     }
@@ -262,11 +279,32 @@ export const WhatsAppPage: React.FC = () => {
                         variant="contained" 
                         color="primary"
                         disabled={loading || !customPhoneInput}
-                        sx={{ fontWeight: 800, whiteSpace: 'nowrap', borderRadius: 2.5, px: 3.5, background: 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)' }}
+                        sx={{ fontWeight: 800, whiteSpace: 'nowrap', borderRadius: 2.5, px: 3, background: 'linear-gradient(135deg, #0d9488 0%, #06b6d4 100%)' }}
                       >
                         ربط وتفعيل رقمي فوراً
                       </Button>
+                      <Button 
+                        type="button"
+                        variant="outlined" 
+                        color="secondary"
+                        onClick={handleRequestPairingCode}
+                        disabled={loading || !customPhoneInput}
+                        sx={{ fontWeight: 800, whiteSpace: 'nowrap', borderRadius: 2.5, px: 2.5, borderColor: '#38bdf8', color: '#38bdf8' }}
+                      >
+                        طلب رمز الاقتران (8 أرقام)
+                      </Button>
                     </Box>
+
+                    {(pairingCodeResult || baileys.pairingCode) && (
+                      <Alert severity="info" sx={{ borderRadius: 3, fontWeight: 800, textAlign: 'right', mt: 1, border: '2px solid #38bdf8', bgcolor: 'rgba(56, 189, 248, 0.1)' }}>
+                        🔑 رمز الاقتران الخاص بك (بدون كاميرا): 
+                        <Typography component="span" sx={{ fontSize: '1.4rem', fontWeight: 900, color: '#38bdf8', mx: 1.5, letterSpacing: 2 }}>
+                          {pairingCodeResult || baileys.pairingCode}
+                        </Typography>
+                        <br />
+                        التعليمات: افتح تطبيق الواتساب بهاتفك &gt; الأجهزة المرتبطة &gt; (الربط باستخدام رقم الهاتف بدلاً من ذلك) &gt; أدخل الرمز أعلاه!
+                      </Alert>
+                    )}
                   </Box>
 
                   {/* QR Code Container */}

@@ -102,6 +102,15 @@ export default async (req, res) => {
       return res.status(200).json({ success: true, message: 'WhatsApp session reset.' });
     }
 
+    if (path.includes('/pairing-code') || (req.method === 'POST' && path.includes('/pair'))) {
+      const phone = inputPhone || body.phoneNumber || body.phone || '966500000000';
+      const clean = phone.replace(/[^0-9]/g, '');
+      const code = `${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      state.baileys.pairingCode = code;
+      state.baileys.status = 'PAIRING_REQUIRED';
+      return res.status(200).json({ success: true, pairingCode: code });
+    }
+
     if (path.includes('/connect') || (req.method === 'POST' && inputPhone)) {
       const targetPhone = inputPhone || '+966500000000';
       const cleanPhone = targetPhone.replace(/[^0-9+]/g, '');

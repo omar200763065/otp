@@ -29,6 +29,12 @@ export class WhatsAppController {
     return this.whatsAppService.setProviderMode(body.mode);
   }
 
+  @ApiOperation({ summary: 'Generate 8-character WhatsApp Pairing Code' })
+  @Post(['pairing-code', 'pair'])
+  async requestPairingCode(@Body() body: { phoneNumber: string }) {
+    return this.baileysService.requestPairingCode(body.phoneNumber);
+  }
+
   @ApiOperation({ summary: 'Disconnect and clear Baileys WhatsApp QR Session' })
   @Post('disconnect')
   async disconnectBaileys() {
