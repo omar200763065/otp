@@ -63,8 +63,9 @@ async function bootstrap() {
 
   // 6. Serve React Frontend UI if dist directory exists
   const candidatePaths = [
+    path.join(__dirname, '..', '..', '..', 'frontend', 'dist'),
     path.join(__dirname, '..', '..', 'frontend', 'dist'),
-    path.join(__dirname, '..', 'frontend', 'dist'),
+    path.join(process.cwd(), '..', 'frontend', 'dist'),
     path.join(process.cwd(), 'frontend', 'dist'),
   ];
   let distPath = candidatePaths.find(p => fs.existsSync(p));
