@@ -49,6 +49,16 @@ export default async (req, res) => {
 
   // Parse Body
   let body = req.body;
+  if (!body && (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH')) {
+    try {
+      const buffers = [];
+      for await (const chunk of req) {
+        buffers.push(chunk);
+      }
+      const raw = Buffer.concat(buffers).toString('utf-8');
+      if (raw) body = JSON.parse(raw);
+    } catch (e) {}
+  }
   if (typeof body === 'string' && body.length > 0) {
     try { body = JSON.parse(body); } catch (e) {}
   }
