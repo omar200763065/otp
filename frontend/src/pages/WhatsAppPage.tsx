@@ -275,7 +275,7 @@ export const WhatsAppPage: React.FC = () => {
                       رمز QR Code المباشر لمسح كاميرا الواتساب
                     </Typography>
                     
-                    {baileys.qrDataUrl ? (
+                    { (baileys.qrDataUrl || baileys.rawQrString) ? (
                       <Box 
                         sx={{ 
                           p: 2.5, 
@@ -286,7 +286,15 @@ export const WhatsAppPage: React.FC = () => {
                         }}
                       >
                         <img 
-                          src={baileys.qrDataUrl} 
+                          src={
+                            baileys.qrDataUrl && baileys.qrDataUrl.startsWith('http')
+                              ? baileys.qrDataUrl
+                              : baileys.qrDataUrl && baileys.qrDataUrl.startsWith('data:image')
+                              ? baileys.qrDataUrl
+                              : baileys.rawQrString
+                              ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(baileys.rawQrString)}`
+                              : `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(baileys.qrDataUrl || '')}`
+                          } 
                           alt="WhatsApp Web Pairing QR Code" 
                           style={{ width: 240, height: 240, display: 'block' }} 
                         />
