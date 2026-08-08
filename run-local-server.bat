@@ -3,8 +3,8 @@ title OTP Enterprise Local Server
 echo =========================================================
 echo   Starting Local OTP SaaS Backend & WhatsApp Engine...
 echo =========================================================
-cd /d "%~dp0"
+cd /d "%~dp0backend"
 set PORT=3000
 set ENABLE_BAILEYS=true
-npm --prefix backend run start:dev
+npm run start:dev
 pause
